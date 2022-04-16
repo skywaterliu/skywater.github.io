@@ -27,22 +27,22 @@
 <meta property="og:site_name" content="安之一隅">
 <meta property="og:description" content="Monitor基础 为什么要学习Monitor 在JDK1.6之前，Synchronized为重量级锁，其实现只依赖于Monitor，效率较低。学习Monitor，是为学习Synchronized打下基础。  什么是Monitor Monitor是一种同步机制。它并不单单属于Java，而是一种系统级别的设计理念。  开发并发应用时，经常需要设计这样的对象，该对象的方法会在多线程的环境下被调用，而这">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://skywaterliu.github.io/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/figure001.jpg">
-<meta property="og:image" content="https://skywaterliu.github.io/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/figure002.jpg">
-<meta property="og:image" content="https://skywaterliu.github.io/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/image-20200906171829072.png">
-<meta property="og:image" content="https://skywaterliu.github.io/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/164e3637df80c2a2">
-<meta property="og:image" content="https://skywaterliu.github.io/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/image-20200610135728528.png">
-<meta property="og:image" content="https://skywaterliu.github.io/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/image-20200610141406509.png">
-<meta property="og:image" content="https://skywaterliu.github.io/2020/09/06/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/Java并发-Synchronized的实现/偏向锁.jpg">
-<meta property="og:image" content="https://skywaterliu.github.io/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/v2-aa44957dcd2bb6d153869db5e43e0113_r.jpg">
-<meta property="og:image" content="https://skywaterliu.github.io/2020/09/06/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/Java并发-Synchronized的实现/轻量级锁.jpg">
-<meta property="og:image" content="https://skywaterliu.github.io/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/3012162-81c5eb0f9a3e7f82.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/Tlx9eKQ5zJw1FDL.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/qIP3clDpdS1jToK.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/e6RK9MfqbA2BLpy.png">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/XOl6P29qpFWHKrY.png">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/aL2FyzqT7Dh5NlQ.png">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/JmFQd8HaOR9uCSN.png">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/dixMak4HhE1Fl3e.png">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/E18VDtjs6hUbHg3.jpg">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/CRFvQy9LVbu6UYh.png">
+<meta property="og:image" content="https://s2.loli.net/2022/04/16/w17ZxmlzrBIOHuq.jpg">
 <meta property="article:published_time" content="2020-09-06T09:38:00.000Z">
-<meta property="article:modified_time" content="2022-04-16T08:32:03.459Z">
+<meta property="article:modified_time" content="2022-04-16T13:04:41.216Z">
 <meta property="article:author" content="你丶一顾倾城">
 <meta property="article:tag" content="多线程">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://skywaterliu.github.io/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/figure001.jpg">
+<meta name="twitter:image" content="https://s2.loli.net/2022/04/16/Tlx9eKQ5zJw1FDL.jpg">
 
 
 <link rel="canonical" href="https://skywaterliu.github.io/2020/09/06/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/">
@@ -235,7 +235,7 @@
         <i class="far fa-calendar-check"></i>
       </span>
       <span class="post-meta-item-text">更新于</span>
-      <time title="修改时间：2022-04-16 16:32:03" itemprop="dateModified" datetime="2022-04-16T16:32:03+08:00">2022-04-16</time>
+      <time title="修改时间：2022-04-16 21:04:41" itemprop="dateModified" datetime="2022-04-16T21:04:41+08:00">2022-04-16</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -310,7 +310,7 @@
 <p><strong>图 1. Monitor Object Sequence Diagram.</strong></p>
 </li>
 </ol>
-<p><img src="/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/figure001.jpg" alt="图 1. Monitor Object Sequence Diagram"></p>
+<p><img src="https://s2.loli.net/2022/04/16/Tlx9eKQ5zJw1FDL.jpg" alt="图 1. Monitor Object Sequence Diagram"></p>
 <h3 id="Java-Monitor-Object"><a href="#Java-Monitor-Object" class="headerlink" title="Java Monitor Object"></a>Java Monitor Object</h3><p>Java Monitor 从两个方面来支持线程之间的同步，即：互斥执行与协作。</p>
 <ul>
 <li><p><strong>互斥执行</strong></p>
@@ -331,7 +331,7 @@
 <p> Java 使用对象锁 ( 使用 synchronized 获得对象锁 ) 保证工作在共享的数据集上的线程<strong>互斥</strong>执行 , 使用 notify&#x2F;notifyAll&#x2F;wait 方法来<strong>协同</strong>不同线程之间的工作。这些方法在 Object 类上被定义，会被所有的 Java 对象自动继承。</p>
 <p>在Java虚拟机(HotSpot)中，monitor是由ObjectMonitor实现的，其主要数据结构如下（位于HotSpot虚拟机源码ObjectMonitor.hpp文件，C++实现的）。</p>
 <p><strong>图 2. Java Monitor</strong></p>
-<p><img src="/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/figure002.jpg" alt="图 2. Java Monitor"></p>
+<p><img src="https://s2.loli.net/2022/04/16/qIP3clDpdS1jToK.jpg" alt="图 2. Java Monitor"></p>
 <p>ObjectMonitor中有两个队列，_WaitSet和_EntryList，用来保存ObjectWaiter对象列表(每个等待锁的线程都会被封装成ObjectWaiter对象。</p>
 <p>_owner指向持有ObjectMonitor对象的线程，当多个线程同时访问一段同步代码时，首先会进入 _EntryList 集合，当线程获取到对象的monitor 后进入 _Owner 区域并把monitor中的owner变量设置为当前线程同时monitor中的计数器count加1，若线程调用wait()方法，将释放当前持有的monitor，owner变量恢复为null，count自减1，同时该线程进入WaitSet集合中等待被唤醒。若当前线程执行完毕也将释放monitor(锁)并复位变量的值，以便其他线程进入获取monitor(锁)。</p>
 <h2 id="Synchronized实现原理"><a href="#Synchronized实现原理" class="headerlink" title="Synchronized实现原理"></a>Synchronized实现原理</h2><p>Synchonized可用于普通同步方法、静态同步方法，以及局部代码块。</p>
@@ -356,10 +356,10 @@
 <p>编译后javap -v TestSync.class</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br></pre></td><td class="code"><pre><span class="line">PS C:\Users\skywater\Desktop&gt; javap -v .\TestSync.<span class="keyword">class</span></span><br><span class="line"><span class="title class_">Classfile</span> /C:/Users/skywater/Desktop/TestSync.<span class="keyword">class</span></span><br><span class="line">  <span class="title class_">Last</span> modified <span class="number">2020</span>-<span class="number">9</span>-<span class="number">6</span>; size <span class="number">457</span> bytes</span><br><span class="line">  MD5 checksum 736aaa775042ba09d031d3781250f216</span><br><span class="line">  Compiled from <span class="string">&quot;TestSync.java&quot;</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestSync</span></span><br><span class="line">  minor version: <span class="number">0</span></span><br><span class="line">  major version: <span class="number">52</span></span><br><span class="line">  flags: ACC_PUBLIC, ACC_SUPER</span><br><span class="line">Constant pool:</span><br><span class="line">   #<span class="number">1</span> = Methodref          #<span class="number">6.</span>#<span class="number">20</span>         <span class="comment">// java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span></span><br><span class="line">   #<span class="number">2</span> = Class              #<span class="number">21</span>            <span class="comment">// MyLock</span></span><br><span class="line">   #<span class="number">3</span> = Methodref          #<span class="number">2.</span>#<span class="number">20</span>         <span class="comment">// MyLock.&quot;&lt;init&gt;&quot;:()V</span></span><br><span class="line">   #<span class="number">4</span> = Methodref          #<span class="number">2.</span>#<span class="number">22</span>         <span class="comment">// MyLock.output:()V</span></span><br><span class="line">   #<span class="number">5</span> = Class              #<span class="number">23</span>            <span class="comment">// TestSync</span></span><br><span class="line">   #<span class="number">6</span> = Class              #<span class="number">24</span>            <span class="comment">// java/lang/Object</span></span><br><span class="line">   #<span class="number">7</span> = Utf8               &lt;init&gt;</span><br><span class="line">   #<span class="number">8</span> = Utf8               ()V</span><br><span class="line">   #<span class="number">9</span> = Utf8               Code</span><br><span class="line">  #<span class="number">10</span> = Utf8               LineNumberTable</span><br><span class="line">  #<span class="number">11</span> = Utf8               main</span><br><span class="line">  #<span class="number">12</span> = Utf8               ([Ljava/lang/String;)V</span><br><span class="line">  #<span class="number">13</span> = Utf8               StackMapTable</span><br><span class="line">  #<span class="number">14</span> = Class              #<span class="number">25</span>            <span class="comment">// &quot;[Ljava/lang/String;&quot;</span></span><br><span class="line">  #<span class="number">15</span> = Class              #<span class="number">21</span>            <span class="comment">// MyLock</span></span><br><span class="line">  #<span class="number">16</span> = Class              #<span class="number">24</span>            <span class="comment">// java/lang/Object</span></span><br><span class="line">  #<span class="number">17</span> = Class              #<span class="number">26</span>            <span class="comment">// java/lang/Throwable</span></span><br><span class="line">  #<span class="number">18</span> = Utf8               SourceFile</span><br><span class="line">  #<span class="number">19</span> = Utf8               TestSync.java</span><br><span class="line">  #<span class="number">20</span> = NameAndType        #<span class="number">7</span>:#<span class="number">8</span>          <span class="comment">// &quot;&lt;init&gt;&quot;:()V</span></span><br><span class="line">  #<span class="number">21</span> = Utf8               MyLock</span><br><span class="line">  #<span class="number">22</span> = NameAndType        #<span class="number">27</span>:#<span class="number">8</span>         <span class="comment">// output:()V</span></span><br><span class="line">  #<span class="number">23</span> = Utf8               TestSync</span><br><span class="line">  #<span class="number">24</span> = Utf8               java/lang/Object</span><br><span class="line">  #<span class="number">25</span> = Utf8               [Ljava/lang/String;</span><br><span class="line">  #<span class="number">26</span> = Utf8               java/lang/Throwable</span><br><span class="line">  #<span class="number">27</span> = Utf8               output</span><br><span class="line">&#123;</span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">TestSync</span><span class="params">()</span>;</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=<span class="number">1</span>, locals=<span class="number">1</span>, args_size=<span class="number">1</span></span><br><span class="line">         <span class="number">0</span>: aload_0</span><br><span class="line">         <span class="number">1</span>: invokespecial #<span class="number">1</span>                  <span class="comment">// Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span></span><br><span class="line">         <span class="number">4</span>: <span class="keyword">return</span></span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line <span class="number">1</span>: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(java.lang.String[])</span>;</span><br><span class="line">    descriptor: ([Ljava/lang/String;)V</span><br><span class="line">    flags: ACC_PUBLIC, ACC_STATIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=<span class="number">2</span>, locals=<span class="number">4</span>, args_size=<span class="number">1</span></span><br><span class="line">         <span class="number">0</span>: <span class="keyword">new</span>           #<span class="number">2</span>                  <span class="comment">// class MyLock</span></span><br><span class="line">         <span class="number">3</span>: dup</span><br><span class="line">         <span class="number">4</span>: invokespecial #<span class="number">3</span>                  <span class="comment">// Method MyLock.&quot;&lt;init&gt;&quot;:()V</span></span><br><span class="line">         <span class="number">7</span>: astore_1</span><br><span class="line">         <span class="number">8</span>: aload_1</span><br><span class="line">         <span class="number">9</span>: dup</span><br><span class="line">        <span class="number">10</span>: astore_2</span><br><span class="line">        <span class="number">11</span>: monitorenter</span><br><span class="line">        <span class="number">12</span>: aload_1</span><br><span class="line">        <span class="number">13</span>: invokevirtual #<span class="number">4</span>                  <span class="comment">// Method MyLock.output:()V</span></span><br><span class="line">        <span class="number">16</span>: aload_2</span><br><span class="line">        <span class="number">17</span>: monitorexit</span><br><span class="line">        <span class="number">18</span>: goto          <span class="number">26</span></span><br><span class="line">        <span class="number">21</span>: astore_3</span><br><span class="line">        <span class="number">22</span>: aload_2</span><br><span class="line">        <span class="number">23</span>: monitorexit</span><br><span class="line">        <span class="number">24</span>: aload_3</span><br><span class="line">        <span class="number">25</span>: athrow</span><br><span class="line">        <span class="number">26</span>: <span class="keyword">return</span></span><br><span class="line">      Exception table:</span><br><span class="line">         from    to  target type</span><br><span class="line">            <span class="number">12</span>    <span class="number">18</span>    <span class="number">21</span>   any</span><br><span class="line">            <span class="number">21</span>    <span class="number">24</span>    <span class="number">21</span>   any</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line <span class="number">4</span>: <span class="number">0</span></span><br><span class="line">        line <span class="number">5</span>: <span class="number">8</span></span><br><span class="line">        line <span class="number">6</span>: <span class="number">12</span></span><br><span class="line">        line <span class="number">7</span>: <span class="number">16</span></span><br><span class="line">        line <span class="number">8</span>: <span class="number">26</span></span><br><span class="line">      StackMapTable: number_of_entries = <span class="number">2</span></span><br><span class="line">        frame_type = <span class="number">255</span> <span class="comment">/* full_frame */</span></span><br><span class="line">          offset_delta = <span class="number">21</span></span><br><span class="line">          locals = [ class <span class="string">&quot;[Ljava/lang/String;&quot;</span>, <span class="keyword">class</span> <span class="title class_">MyLock</span>, <span class="keyword">class</span> <span class="title class_">java</span>/lang/Object ]</span><br><span class="line">          stack = [ <span class="keyword">class</span> <span class="title class_">java</span>/lang/Throwable ]</span><br><span class="line">        frame_type = <span class="number">250</span> <span class="comment">/* chop */</span></span><br><span class="line">          offset_delta = <span class="number">4</span></span><br><span class="line">&#125;</span><br><span class="line">SourceFile: <span class="string">&quot;TestSync.java&quot;</span></span><br></pre></td></tr></table></figure>
 
-<p><img src="/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/image-20200906171829072.png" alt="image-20200906171829072"></p>
+<p><img src="https://s2.loli.net/2022/04/16/e6RK9MfqbA2BLpy.png" alt="image-20200906171829072"></p>
 <p>在JVM里，对象锁就是实现monitor机制的一种方式。entermonitor就是获得某个对象的lock(owner是当前线程)，leavemonitor就是释放某个对象的锁。</p>
 <h3 id="对象头"><a href="#对象头" class="headerlink" title="对象头"></a>对象头</h3><p><code>synchronized</code>使用的锁是存在于对象头中。</p>
-<p><img src="/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/164e3637df80c2a2" alt="img"></p>
+<p><img src="https://s2.loli.net/2022/04/16/XOl6P29qpFWHKrY.png" alt="img"></p>
 <p>如果锁是数组，则使用三个字宽来表示对象头，如果是非数组，则用两个字宽来表示。</p>
 <p>1字宽&#x3D;4字节&#x3D;32bit</p>
 <table>
@@ -412,9 +412,9 @@
 </tbody></table>
 <p>在运行期间，Mark Word里存储的数据会随着锁标志位的改变而改变，可能有以下四种情况</p>
 <p><strong>32位虚拟机</strong></p>
-<p><img src="/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/image-20200610135728528.png" alt="image-20200610135728528"></p>
+<p><img src="https://s2.loli.net/2022/04/16/aL2FyzqT7Dh5NlQ.png" alt="image-20200610135728528"></p>
 <p><strong>64位虚拟机</strong></p>
-<p><img src="/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/image-20200610141406509.png" alt="image-20200610141406509"></p>
+<p><img src="https://s2.loli.net/2022/04/16/JmFQd8HaOR9uCSN.png" alt="image-20200610141406509"></p>
 <blockquote>
 <p>一些名词解释：</p>
 <p>identity hash code是指<strong>不经重写</strong>过由jvm计算的hashcode*</p>
@@ -473,7 +473,7 @@
 <p>偏向锁的撤销，需要等待全局安全点（在这个时间点上没有字节码正在执行），它会首先暂停拥有偏向锁的线程，然后检查持有偏向锁的线程是否活着，如果线程不处于活动状态，则将对象头设置成<strong>无锁状态</strong> （标志位为“01”） ，若处于活动状态，则膨胀为<strong>轻量级锁</strong>（标志位为“00”）。最后唤醒暂停的线程 。</p>
 <p>此时的轻量级锁由原持有偏向锁的线程所有，并继续执行其同步代码，而正在竞争的线程会自旋等待该轻量级锁。（对于一个已经竞争到同步锁的线程，在还没有走出同步块的时候，时间片结束不会导致释放锁。）</p>
 <p>流程可见下图：</p>
-<img src="Java并发-Synchronized的实现/偏向锁.jpg" alt="偏向锁"  />
+<img src="https://s2.loli.net/2022/04/16/dixMak4HhE1Fl3e.png" alt="偏向锁"  />
 
 <h5 id="关闭偏向锁"><a href="#关闭偏向锁" class="headerlink" title="关闭偏向锁"></a>关闭偏向锁</h5><p>Java6与Java7中默认启用偏向锁，但是它在应用程序启动几秒钟之后才激活，如有必要可以使用JVM参数来关闭延迟：<code>-XX:BiasedLockingStartupDelay=0  </code>。</p>
 <p>如果确定应用程序所有的锁基本都出在竞争状态下，则可以选择关闭偏向锁：<code>-XX:-UseBiasedLocking=false  </code>，此时，当申请锁时都会进入轻量级锁状态。</p>
@@ -481,8 +481,8 @@
 <p>在代码进入同步块时，如果此同步对象未被锁定，锁标志位“01”，虚拟机将在当前线程的栈帧中建立一个名为<strong>锁记录Lock Record</strong>的空间用于存储锁对象对象头中Mark Word的拷贝</p>
 <p>在线程栈帧中创建Lock Record空间，并在其中创建所对象头Mark Word的拷贝，修改拷贝的Mark Word中的Owner内容为指向锁对象的指针。</p>
 <p>修改锁标志位为00，将指向线程ID的指针记录到锁对象头中。</p>
-<p><img src="/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/v2-aa44957dcd2bb6d153869db5e43e0113_r.jpg" alt="preview"></p>
-<img src="Java并发-Synchronized的实现/轻量级锁.jpg" alt="轻量锁及膨胀流程图"  />
+<p><img src="https://s2.loli.net/2022/04/16/E18VDtjs6hUbHg3.jpg" alt="preview"></p>
+<img src="https://s2.loli.net/2022/04/16/CRFvQy9LVbu6UYh.png" alt="轻量锁及膨胀流程图"  />
 
 <h4 id="重量级锁"><a href="#重量级锁" class="headerlink" title="重量级锁"></a>重量级锁</h4><p>重量级锁依赖于Monitor实现，而Java中的ObjectMonitor基于系统底层的Mutex Lock（互斥锁）来实现。</p>
 <p><code>Mutex Lock</code>保护代码临界区在同一时刻只有一个线程可以访问。如果线程访问时已上锁，则新线程进入阻塞（BLOCKED）。代码块执行结束后，需要对<code>Mutex Lock</code>进行解锁。</p>
@@ -516,7 +516,7 @@
 </tr>
 </tbody></table>
 <p>附：全流程</p>
-<p><img src="/Java%E5%B9%B6%E5%8F%91-Synchronized%E7%9A%84%E5%AE%9E%E7%8E%B0/3012162-81c5eb0f9a3e7f82.jpg" alt="img"></p>
+<p><img src="https://s2.loli.net/2022/04/16/w17ZxmlzrBIOHuq.jpg" alt="img"></p>
 <hr>
 <blockquote>
 <p>参考</p>
