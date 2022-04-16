@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"skywaterliu.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.11.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":true,"nav":{"utterances":{"order":-1}},"activeClass":"utterances"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Buildah buildah是Redhat旗下的一款专门构建工具，与Docker相比，优势在于：   * 环境并不需要daemon（守护进程）  * 不需要Dockerfile但也可以兼容Dockerfile  * 可以将容器目录挂载到本地，通过直接操作本地目录来操作容器内容  * 可以创建更小的镜像  安装 构建机器需要安装buildah，参见https:&#x2F;&#x2F;github.com&#x2F;contai">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Buildah入门">
+<meta property="og:url" content="https://skywaterliu.github.io/2021/04/16/Buildah%E5%85%A5%E9%97%A8/index.html">
+<meta property="og:site_name" content="安之一隅">
+<meta property="og:description" content="Buildah buildah是Redhat旗下的一款专门构建工具，与Docker相比，优势在于：   * 环境并不需要daemon（守护进程）  * 不需要Dockerfile但也可以兼容Dockerfile  * 可以将容器目录挂载到本地，通过直接操作本地目录来操作容器内容  * 可以创建更小的镜像  安装 构建机器需要安装buildah，参见https:&#x2F;&#x2F;github.com&#x2F;contai">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-04-16T08:41:00.000Z">
+<meta property="article:modified_time" content="2022-04-16T09:44:08.145Z">
+<meta property="article:author" content="你丶一顾倾城">
+<meta property="article:tag" content="OCI">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://skywaterliu.github.io/2021/04/16/Buildah%E5%85%A5%E9%97%A8/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://skywaterliu.github.io/2021/04/16/Buildah%E5%85%A5%E9%97%A8/","path":"2021/04/16/Buildah入门/","title":"Buildah入门"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Buildah入门 | 安之一隅</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">安之一隅</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">莫听穿林打叶声，何妨吟啸且徐行。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Buildah"><span class="nav-number">1.</span> <span class="nav-text">Buildah</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">1.1.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">1.2.</span> <span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Dockerfile%E6%96%B9%E5%BC%8F"><span class="nav-number">1.2.1.</span> <span class="nav-text">Dockerfile方式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0layers%E9%85%8D%E7%BD%AE"><span class="nav-number">1.2.1.1.</span> <span class="nav-text">添加layers配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0layers-xml"><span class="nav-number">1.2.1.2.</span> <span class="nav-text">添加layers.xml</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0multi-stage-Dockerfile"><span class="nav-number">1.2.1.3.</span> <span class="nav-text">添加multi-stage Dockerfile</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#bash%E8%84%9A%E6%9C%AC%E6%96%B9%E5%BC%8F"><span class="nav-number">1.2.2.</span> <span class="nav-text">bash脚本方式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AF%B9multi-stage%E7%9A%84%E6%94%AF%E6%8C%81"><span class="nav-number">1.2.2.1.</span> <span class="nav-text">对multi-stage的支持</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%95%9C%E5%83%8F%E6%8E%A8%E9%80%81"><span class="nav-number">2.</span> <span class="nav-text">镜像推送</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">你丶一顾倾城</p>
+  <div class="site-description" itemprop="description">嗨害嗨！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/skywaterliu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;skywaterliu" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:liutianshui17@gmail.com" title="E-Mail → mailto:liutianshui17@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://skywaterliu.github.io/2021/04/16/Buildah%E5%85%A5%E9%97%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="你丶一顾倾城">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="安之一隅">
+      <meta itemprop="description" content="嗨害嗨！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Buildah入门 | 安之一隅">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Buildah入门
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-04-16 16:41:00" itemprop="dateCreated datePublished" datetime="2021-04-16T16:41:00+08:00">2021-04-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-04-16 17:44:08" itemprop="dateModified" datetime="2022-04-16T17:44:08+08:00">2022-04-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%B9%E5%99%A8%E5%8C%96/" itemprop="url" rel="index"><span itemprop="name">容器化</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%AE%B9%E5%99%A8%E5%8C%96/Cloud-Native/" itemprop="url" rel="index"><span itemprop="name">Cloud Native</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="Buildah"><a href="#Buildah" class="headerlink" title="Buildah"></a>Buildah</h2><p>buildah是Redhat旗下的一款专门构建工具，与Docker相比，优势在于：</p>
+<ul>
+<li>环境并不需要daemon（守护进程）</li>
+<li>不需要Dockerfile但也可以兼容Dockerfile</li>
+<li>可以将容器目录挂载到本地，通过直接操作本地目录来操作容器内容</li>
+<li>可以创建更小的镜像</li>
+</ul>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>构建机器需要安装buildah，参见<a target="_blank" rel="noopener" href="https://github.com/containers/buildah/blob/main/install.md">https://github.com/containers/buildah/blob/main/install.md</a></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><h4 id="Dockerfile方式"><a href="#Dockerfile方式" class="headerlink" title="Dockerfile方式"></a>Dockerfile方式</h4><p>buildah兼容Dockerfile，原先使用Dockerfile的项目并不需要什么迁移成本。对于新项目，推荐以下构建方式。</p>
+<h5 id="添加layers配置"><a href="#添加layers配置" class="headerlink" title="添加layers配置"></a>添加layers配置</h5><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">mainClass</span>&gt;</span>com.focustech.naja.web.mvc.NajaMvcServerMain<span class="tag">&lt;/<span class="name">mainClass</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layers</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">enabled</span>&gt;</span>true<span class="tag">&lt;/<span class="name">enabled</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span>$&#123;project.basedir&#125;/layers.xml<span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">layers</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">goal</span>&gt;</span>repackage<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="添加layers-xml"><a href="#添加layers-xml" class="headerlink" title="添加layers.xml"></a>添加layers.xml</h5><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">layers</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://www.springframework.org/schema/boot/layers&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">        <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://www.springframework.org/schema/boot/layers</span></span></span><br><span class="line"><span class="string"><span class="tag">                          https://www.springframework.org/schema/boot/layers/layers-2.6.xsd&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">application</span>&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- &lt;application&gt;标签中的内容定义了所有应用代码内容应该被如何分配到各个layer中，遵循Ant-style --&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- &lt;into&gt;标签定义标签内容需要被添加到指定layer中 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">into</span> <span class="attr">layer</span>=<span class="string">&quot;spring-boot-loader&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>org/springframework/boot/loader/**<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">into</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">into</span> <span class="attr">layer</span>=<span class="string">&quot;application&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">application</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- &lt;dependencies&gt;标签中的内容定义了所有dependencies应该被如何分配到各个layer中，遵循group:artifact[:version]模式 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">into</span> <span class="attr">layer</span>=<span class="string">&quot;application&quot;</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">includeModuleDependencies</span> /&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">into</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">into</span> <span class="attr">layer</span>=<span class="string">&quot;snapshot-dependencies&quot;</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- 对应maven坐标 group:artifact[:version]，如果需要限定SNAPSHOT则加载最后 --&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">include</span>&gt;</span>*:*:*SNAPSHOT<span class="tag">&lt;/<span class="name">include</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">into</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">into</span> <span class="attr">layer</span>=<span class="string">&quot;dependencies&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- layerOrder中需要包含&lt;application&gt;与&lt;dependencies&gt;中出现过的所有layer属性值 --&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- layerOrder中layer出现的顺序很重要，出现变化概率越低的在最上面，而越高的则在最下面 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">layerOrder</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layer</span>&gt;</span>dependencies<span class="tag">&lt;/<span class="name">layer</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layer</span>&gt;</span>spring-boot-loader<span class="tag">&lt;/<span class="name">layer</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layer</span>&gt;</span>snapshot-dependencies<span class="tag">&lt;/<span class="name">layer</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">layer</span>&gt;</span>application<span class="tag">&lt;/<span class="name">layer</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">layerOrder</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">layers</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="添加multi-stage-Dockerfile"><a href="#添加multi-stage-Dockerfile" class="headerlink" title="添加multi-stage Dockerfile"></a>添加multi-stage Dockerfile</h5><p>细节配置可以根据项目需要进行调整。主要关注第二个FROM中的环境变量配置，暴露的端口，以及最后的ENTRYPOINT(CMD)，根据需要修改。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">FROM openjdk:8-jdk-alpine as builder</span><br><span class="line"></span><br><span class="line">WORKDIR app</span><br><span class="line">ARG JAR_FILE=./target/*.jar</span><br><span class="line">COPY $&#123;JAR_FILE&#125; /app/app.jar</span><br><span class="line">RUN java -Djarmode=layertools -jar app.jar extract &amp;&amp; rm app.jar</span><br><span class="line"></span><br><span class="line">FROM openjdk:8-jdk-alpine</span><br><span class="line"></span><br><span class="line">LABEL maintainer=&quot;xxx&quot;</span><br><span class="line"></span><br><span class="line">ENV TZ=Asia/Shanghai</span><br><span class="line">RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime &amp;&amp; echo $TZ &gt; /etc/timezone</span><br><span class="line">ENV JAVA_OPTS=&quot;-Xms128m -Xmx256m&quot;</span><br><span class="line"></span><br><span class="line">WORKDIR app</span><br><span class="line"></span><br><span class="line">COPY --from=builder /app/dependencies/ ./</span><br><span class="line">COPY --from=builder /app/snapshot-dependencies/ ./</span><br><span class="line">COPY --from=builder /app/spring-boot-loader/ ./</span><br><span class="line">COPY --from=builder /app/application/ ./</span><br><span class="line"></span><br><span class="line">EXPOSE 8080</span><br><span class="line"></span><br><span class="line">ENTRYPOINT [&quot;sh&quot;, &quot;-c&quot;, &quot;java $JAVA_OPTS org.springframework.boot.loader.JarLauncher&quot;]</span><br></pre></td></tr></table></figure>
+
+<h4 id="bash脚本方式"><a href="#bash脚本方式" class="headerlink" title="bash脚本方式"></a>bash脚本方式</h4><p>如果采用bash方式，则不适用分层构建（multi-stage），原因是Dockerfile每句指令将生成新Layer，可以作为缓存，而bash则是流水线式，不支持缓存。</p>
+<p>构建语句与Dockerfile类似，具体语法可参见<a target="_blank" rel="noopener" href="https://github.com/containers/buildah/tree/main/docs%EF%BC%8C%E4%B8%8B%E9%9D%A2%E6%98%AF%E5%9F%BA%E6%9C%AC%E7%A4%BA%E4%BE%8B%E3%80%82">https://github.com/containers/buildah/tree/main/docs，下面是基本示例。</a></p>
+<p><strong>新建buildah.sh</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取基础容器</span></span><br><span class="line">container=$(buildah from openjdk:8-jdk-alpine)</span><br><span class="line">buildah config --label maintainer=<span class="string">&quot;xxx&quot;</span> <span class="variable">$containter</span></span><br><span class="line"><span class="comment"># 设置容器内容</span></span><br><span class="line">buildah run <span class="variable">$container</span> -- /bin/sh -c <span class="string">&#x27;mkdir /tmp/logs&#x27;</span></span><br><span class="line">buildah config --workingdir app <span class="variable">$container</span></span><br><span class="line">buildah copy <span class="variable">$container</span> <span class="string">&#x27;./target/*.jar&#x27;</span> <span class="string">&#x27;/app/app.jar&#x27;</span></span><br><span class="line"><span class="comment"># 设置暴露端口</span></span><br><span class="line">buildah config --port 8080 <span class="variable">$container</span></span><br><span class="line"><span class="comment"># 初始指令</span></span><br><span class="line">buildah config --entrypoint [<span class="string">&quot;java&quot;</span>,<span class="string">&quot;-jar&quot;</span>,<span class="string">&quot;app.jar&quot;</span>]</span><br><span class="line"><span class="comment"># 提交本地容器</span></span><br><span class="line">buildah commit <span class="variable">$container</span> buildah-springboot-demo:v1</span><br><span class="line">buildah <span class="built_in">rm</span> <span class="variable">$container</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="对multi-stage的支持"><a href="#对multi-stage的支持" class="headerlink" title="对multi-stage的支持"></a>对multi-stage的支持</h5><p>如果原先项目是分层打包的（maven配置了layers为true），则可以采用以下bash</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 抽取多层layers</span></span><br><span class="line">builder_ctx=$(buildah from openjdk:8-jdk-alpine)</span><br><span class="line">builder_mnt=$(buildah mount <span class="variable">$builder_ctx</span>)</span><br><span class="line">buildah config --label maintainer=<span class="string">&quot;xxx&quot;</span> <span class="variable">$builder_ctx</span></span><br><span class="line">buildah config --workingdir app <span class="variable">$builder_ctx</span></span><br><span class="line">JAR_FILE=<span class="string">&#x27;./target/*.jar&#x27;</span></span><br><span class="line">buildah copy <span class="variable">$builder_ctx</span> <span class="variable">$JAR_FILE</span> <span class="string">&#x27;/app/app.jar&#x27;</span></span><br><span class="line">buildah run <span class="variable">$builder_ctx</span> -- /bin/sh -c <span class="string">&#x27;java -Djarmode=layertools -jar app.jar extract &amp;&amp; rm app.jar&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建容器，设置环境信息，并从builder容器拷贝layers文件信息</span></span><br><span class="line">application_ctx=$(buildah from openjdk:8-jdk-alpine)</span><br><span class="line">application_mnt=$(buildah mount <span class="variable">$application_ctx</span>)</span><br><span class="line">buildah config --workingdir app <span class="variable">$application_ctx</span></span><br><span class="line">buildah config --<span class="built_in">env</span> TZ=Asia/Shanghai <span class="variable">$application_ctx</span></span><br><span class="line">buildah run <span class="variable">$application_ctx</span> -- /bin/sh -c <span class="string">&#x27;ln -snf /usr/share/zoneinfo/$TZ /etc/localtime &amp;&amp; echo $TZ &gt; /etc/timezone&#x27;</span></span><br><span class="line">buildah config --<span class="built_in">env</span> JAVA_OPTS=<span class="string">&#x27;-Xms128m -Xmx256m&#x27;</span> <span class="variable">$application_ctx</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">cp</span> -rf <span class="variable">$builder_mnt</span>/app/dependencies/ <span class="variable">$application_mnt</span>/app</span><br><span class="line"><span class="built_in">cp</span> -rf <span class="variable">$builder_mnt</span>/app/snapshot-dependencies/ <span class="variable">$application_mnt</span>/app</span><br><span class="line"><span class="built_in">cp</span> -rf <span class="variable">$builder_mnt</span>/app/spring-boot-loader/ <span class="variable">$application_mnt</span>/app</span><br><span class="line"><span class="built_in">cp</span> -rf <span class="variable">$builder_mnt</span>/app/application/ <span class="variable">$application_mnt</span>/app</span><br><span class="line"><span class="comment"># 设置暴露的端口</span></span><br><span class="line">buildah config --port 8080 <span class="variable">$application_ctx</span></span><br><span class="line"></span><br><span class="line">buildah config --entrypoint [<span class="string">&quot;sh&quot;</span>, <span class="string">&quot;-c&quot;</span>, <span class="string">&quot;java <span class="variable">$JAVA_OPTS</span> org.springframework.boot.loader.JarLauncher&quot;</span>]</span><br><span class="line"><span class="comment"># 删除临时容器以及挂载目录</span></span><br><span class="line">buildah unmount <span class="variable">$builder_ctx</span> <span class="variable">$application_ctx</span></span><br><span class="line">buildah commit <span class="variable">$application_ctx</span> buildah/layer-springboot-demo:v2</span><br><span class="line">buildah <span class="built_in">rm</span> <span class="variable">$builder_ctx</span> <span class="variable">$application_ctx</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="镜像推送"><a href="#镜像推送" class="headerlink" title="镜像推送"></a>镜像推送</h2><p>写了个打包推送的脚本package-oci.sh</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;--------- start ---------&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">env</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">JAVA_HOME=<span class="variable">$JAVA_HOME</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">maven_home=<span class="variable">$MAVEN_HOME</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">export</span> MAVEN_HOME=<span class="variable">$&#123;maven_home&#125;</span></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"><span class="built_in">export</span> PATH=<span class="variable">$MAVEN_HOME</span>/bin:<span class="variable">$PATH</span></span></span><br><span class="line">IS_DEBUG=false</span><br><span class="line">REMOTE_REGISTRY=$&#123;REMOTE_IMAGE_REGISTRY:-docker://127.0.0.1:5000&#125;</span><br><span class="line"></span><br><span class="line">[ $IS_DEBUG = &quot;true&quot; ] &amp;&amp; echo original parameters=[$@]</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">project path <span class="keyword">for</span> being packaged</span></span><br><span class="line">PROJECT_HOME=&quot;.&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">to store <span class="built_in">log</span> files and other temp cache</span></span><br><span class="line">TMP_DIR=&quot;&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">bash script <span class="built_in">log</span> path</span></span><br><span class="line">LOG_FILE=&quot;&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">which</span> strategy will be used to build the image</span></span><br><span class="line">PACKAGE_STRATEGY=&quot;Dockerfile&quot; # or &quot;buildah&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">image info. like nginx:v1</span></span><br><span class="line">IMAGE_INFO=&quot;&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">build file path, often be a Dockerfile or a bash script</span></span><br><span class="line">BUILD_FILE=&quot;&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">do</span> you need to push the image to the remote repository</span></span><br><span class="line">PUSH_FLAG=false</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">do</span> you need to run `mvn clean package` before build image</span></span><br><span class="line">PACKAGE_FLAG=true</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">do</span> you need to build image</span></span><br><span class="line">BUILD_FLAG=true</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">username:password</span></span><br><span class="line">CREDS=&quot;&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash"></span></span><br><span class="line"><span class="language-bash"><span class="function"><span class="title">logPrint</span></span>() &#123;</span></span><br><span class="line">  message=&quot;$1&quot;</span><br><span class="line">  echo &quot;$(date +&#x27;%F %T&#x27;) $&#123;message&#125;&quot; &gt;&gt;$LOG_FILE</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">show_help() &#123;</span><br><span class="line">  echo &quot;执行打包&amp;发布镜像&quot;</span><br><span class="line">  echo &quot;./package-opt.sh [options]...&quot;</span><br><span class="line">  echo &quot;-p, --project-home                    项目根目录，如/home/projects/springboot-demo&quot;</span><br><span class="line">  echo &quot;-i, --image-info                      镜像信息，包含镜像名以及版本，格式同docker，[imageName:version]，如nginx:v1&quot;</span><br><span class="line">  echo &quot;-s, --package-strategy                打包策略接受参数[ Dockerfile(default) | buildah ]，是使用Dockerfile的方式，还是使用buildah的方式。如果是Dockerfile方式，项目根目录下需要有Dockerfile文件，如果是buildah方式，则项目根目录下需要有buildah.sh文件&quot;</span><br><span class="line">  echo &quot;-b, --build-file                      打包执行文件路径，Dockerfile或者buildah.sh，如果值为Dockerfile，将默认使用Dockerfile打包策略，否则使用buildah打包策略&quot;</span><br><span class="line">  echo &quot;    --push-flag                       是否发布到远程仓库,true or false(default)&quot;</span><br><span class="line">  echo &quot;    --package-flag                    是否执行maven打包,true(default) or false&quot;</span><br><span class="line">  echo &quot;    --build-flag                      是否执行本地镜像构建,true(default) or false&quot;</span><br><span class="line">  echo &quot;-r  --remote-registry                 远程仓库地址,例如：docker://docker.vemic.com/fas-oss。默认为环境变量REMOTE_IMAGE_REGISTRY的值。如果未设置该环境变量，则默认docker://127.0.0.1:5000。&quot;</span><br><span class="line">  echo &quot;    --creds [username[:password]]     远程仓库用户名密码。--creds=username:password&quot;</span><br><span class="line">  echo &quot;-h, --help                            帮助选项。&quot;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">read</span> args</span></span><br><span class="line">ARGS_CMD=$(getopt -o hp:i:s:b:r: --long help,project-home:,image-info:,package-strategy:,build-file:,push-flag:,package-flag:,build-flag:,creds:,remote-registry -n $(basename $0) -- &quot;$@&quot;)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">echo</span> ARGS_CMD=[<span class="variable">$ARGS</span>]</span></span><br><span class="line">[ $? -ne 0 ] &amp;&amp; exit 1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">echo</span> formatted parameters=[<span class="variable">$@</span>]</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">dispatch formatted arguments to position arguments(<span class="variable">$1</span>,<span class="variable">$2</span>,...)</span></span><br><span class="line">eval set -- &quot;$ARGS_CMD&quot;</span><br><span class="line">while [ -n &quot;$1&quot; ]; do</span><br><span class="line">  case &quot;$1&quot; in</span><br><span class="line">  -h | --help)</span><br><span class="line">    show_help</span><br><span class="line">    shift 1</span><br><span class="line">    exit 1</span><br><span class="line">    ;;</span><br><span class="line">  -p | --project-home)</span><br><span class="line">    PROJECT_HOME=$2</span><br><span class="line">    if [ ! -d $PROJECT_HOME ]; then</span><br><span class="line">      echo &quot;project home not exist! target: $PROJECT_HOME&quot;</span><br><span class="line">      shift 2</span><br><span class="line">      exit 1</span><br><span class="line">    fi</span><br><span class="line">    shift 2</span><br><span class="line">    ;;</span><br><span class="line">  -i | --image-info)</span><br><span class="line">    IMAGE_INFO=$2</span><br><span class="line">    [ -z &quot;$IMAGE_INFO&quot; ] &amp;&amp; echo &quot;please set image info (like: -i nginx:v1)&quot; &amp;&amp; exit</span><br><span class="line">    shift 2</span><br><span class="line">    ;;</span><br><span class="line">  -b | --build-file)</span><br><span class="line">    BUILD_FILE=$2</span><br><span class="line">    if [ ! -f $BUILD_FILE ]; then</span><br><span class="line">      echo &quot;build file not exist! file path: $BUILD_FILE&quot;</span><br><span class="line">      exit 1</span><br><span class="line">    elif [[ &quot;$(basename $BUILD_FILE)&quot; = &quot;Dockerfile&quot; ]]; then</span><br><span class="line">      PACKAGE_STRATEGY=&quot;Dockerfile&quot;</span><br><span class="line">    else</span><br><span class="line">      PACKAGE_STRATEGY=&quot;buildah&quot;</span><br><span class="line">    fi</span><br><span class="line">    shift 2</span><br><span class="line">    ;;</span><br><span class="line">  -s | --package-strategy)</span><br><span class="line">    strategy=$2</span><br><span class="line">    if [[ $strategy != &quot;Dockerfile&quot; &amp;&amp; $strategy != &quot;buildah&quot; ]]; then</span><br><span class="line">      echo &quot;package strategy requires arg &#x27;Dockerfile&#x27; or &#x27;buildah&#x27;&quot; &amp;&amp; exit 1</span><br><span class="line">    fi</span><br><span class="line">    PACKAGE_STRATEGY=$2</span><br><span class="line">    shift 2</span><br><span class="line">    ;;</span><br><span class="line">  --push-flag)</span><br><span class="line">    if [[ $2 != &quot;true&quot; &amp;&amp; $2 != &quot;false&quot; ]]; then</span><br><span class="line">      echo &quot;--push-flag must be true or false!&quot; &amp;&amp; exit 1</span><br><span class="line">    fi</span><br><span class="line">    PUSH_FLAG=$2</span><br><span class="line">    shift 2</span><br><span class="line">    ;;</span><br><span class="line">  --package-flag)</span><br><span class="line">    if [[ $2 != &quot;true&quot; &amp;&amp; $2 != &quot;false&quot; ]]; then</span><br><span class="line">      echo &quot;--package-flag must be true or false!&quot; &amp;&amp; exit 1</span><br><span class="line">    fi</span><br><span class="line">    PACKAGE_FLAG=$2</span><br><span class="line">    shift 2</span><br><span class="line">    ;;</span><br><span class="line">  --build-flag)</span><br><span class="line">    if [[ $2 != &quot;true&quot; &amp;&amp; $2 != &quot;false&quot; ]]; then</span><br><span class="line">      echo &quot;--build-flag must be true or false!&quot; &amp;&amp; exit 1</span><br><span class="line">    fi</span><br><span class="line">    BUILD_FLAG=$2</span><br><span class="line">    shift 2</span><br><span class="line">    ;;</span><br><span class="line">  -r | --remote-registry)</span><br><span class="line">    if [[ ! &quot;$2&quot; =~ ^docker://.*|^docker-daemon:*|^oci:* ]]; then</span><br><span class="line">      echo &quot;-r|--remote-registry is empty! please set correct address. see --help for more info.&quot; &amp;&amp; exit 1</span><br><span class="line">    fi</span><br><span class="line">    REMOTE_REGISTRY=$2</span><br><span class="line">    shift 2</span><br><span class="line">    ;;</span><br><span class="line">  --creds)</span><br><span class="line">    if [[ $2 = &quot;&quot; ]]; then</span><br><span class="line">      echo &quot;--creds is empty. please set --creds=username:password&quot; &amp;&amp; exit 1</span><br><span class="line">    fi</span><br><span class="line">    CREDS=$2</span><br><span class="line">    shift 2</span><br><span class="line">    ;;</span><br><span class="line">  \:)</span><br><span class="line">    echo &quot;argument value missing! $1&quot;</span><br><span class="line">    show_help &amp;&amp; exit 1</span><br><span class="line">    ;;</span><br><span class="line">  \?)</span><br><span class="line">    echo &quot;unknown argument! $1&quot;</span><br><span class="line">    show_help</span><br><span class="line">    exit 1</span><br><span class="line">    ;;</span><br><span class="line">  --)</span><br><span class="line">    shift</span><br><span class="line">    break</span><br><span class="line">    ;;</span><br><span class="line">  *)</span><br><span class="line">    echo &quot;error arg! $1&quot;</span><br><span class="line">    show_help</span><br><span class="line">    exit 1</span><br><span class="line">    ;;</span><br><span class="line">  esac</span><br><span class="line">done</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">make preparations</span></span><br><span class="line">make_preparations() &#123;</span><br><span class="line">  echo &quot;make_pre&quot;</span><br><span class="line">  TMP_DIR=&quot;/tmp/oci-package/$(date +%Y%m%d)&quot;</span><br><span class="line">  mkdir -p $TMP_DIR</span><br><span class="line">  LOG_FILE=&quot;$&#123;TMP_DIR&#125;/$(date +%H%M%S).log&quot;</span><br><span class="line">  touch $LOG_FILE</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">mvn operations</span></span><br><span class="line">do_compile() &#123;</span><br><span class="line">  echo &quot;maven compile work start&quot;</span><br><span class="line">  if [ -f &quot;$PROJECT_HOME pom.xml&quot; ]; then</span><br><span class="line">    echo &quot;pom.xml does not exist in the specified directory $PROJECT_HOME&quot; &amp;&amp; exit 1</span><br><span class="line">  fi</span><br><span class="line">  echo &quot;target project home is : $PROJECT_HOME&quot;</span><br><span class="line">  cd $PROJECT_HOME</span><br><span class="line">  mvn clean package -Dmaven.test.skip=true &gt;&gt;$LOG_FILE 2&gt;&amp;1</span><br><span class="line">  if [ $? -ne 0 ]; then</span><br><span class="line">    echo &quot;mvn clean package failed! Please see $LOG_FILE&quot; &amp;&amp; exit 1</span><br><span class="line">  else</span><br><span class="line">    echo &quot;mvn packaged successfully!&quot;</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">push_image() &#123;</span><br><span class="line">  echo &quot;start push image...&quot;</span><br><span class="line">  cmd=&quot;buildah push --tls-verify=false&quot;</span><br><span class="line">  [ -n &quot;$CREDS&quot; ] &amp;&amp; cmd=&quot;$&#123;cmd&#125; --creds=$CREDS&quot;</span><br><span class="line">  if [[ &quot;$REMOTE_REGISTRY&quot; =~ ^docker://.* ]]; then</span><br><span class="line">    cmd=&quot;$&#123;cmd&#125; $IMAGE_INFO $REMOTE_REGISTRY/$IMAGE_INFO&quot;</span><br><span class="line">  elif [[ &quot;$REMOTE_REGISTRY&quot; =~ ^docker-daemon:* ]]; then</span><br><span class="line">    cmd=&quot;$&#123;cmd&#125; $IMAGE_INFO docker-daemon:$IMAGE_INFO&quot;</span><br><span class="line">  elif [[ &quot;$REMOTE_REGISTRY&quot; =~ ^oci:* ]]; then</span><br><span class="line">    cmd=&quot;$&#123;cmd&#125; $IMAGE_INFO $REMOTE_REGISTRY:$IMAGE_INFO&quot;</span><br><span class="line">  else</span><br><span class="line">    echo &quot;REMOTE_IMAGE_REGISTRY invalid, please start with &#x27;docker://&#x27; or &#x27;docker-daemon:&#x27; or &#x27;oci:&#x27;. see --help for more info.&quot;</span><br><span class="line">  fi</span><br><span class="line">  eval $cmd</span><br><span class="line">  if [ $? -eq 0 ]; then</span><br><span class="line">    echo &quot;push image successfully!&quot;</span><br><span class="line">  else</span><br><span class="line">    echo &quot;push image to $REMOTE_REGISTRY/$IMAGE_INFO failed!&quot; &amp;&amp; exit 1</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">package_oci_image_for_docker() &#123;</span><br><span class="line">  cd $PROJECT_HOME</span><br><span class="line">  if [ -f &quot;$PROJECT_HOME Dockerfile&quot; ]; then</span><br><span class="line">    echo &quot;Dockerfile does not exist in the specified directory $PROJECT_HOME&quot;</span><br><span class="line">    exit 1</span><br><span class="line">  else</span><br><span class="line">    cmd=&#x27;buildah bud --layers &#x27;$&#123;BUILD_FILE:+&quot;-f $BUILD_FILE&quot;&#125;&#x27; -t $IMAGE_INFO .&#x27;</span><br><span class="line">    eval $cmd</span><br><span class="line">    [ $? -ne 0 ] &amp;&amp; echo &quot;build with Dockerfile failed!&quot; &amp;&amp; exit 1</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">package_oci_image() &#123;</span><br><span class="line">  cd $PROJECT_HOME</span><br><span class="line">  if [ -f &quot;$PROJECT_HOME buildah.sh&quot; ]; then</span><br><span class="line">    echo &quot;buildah.sh does not exist in the specified directory $PROJECT_HOME&quot;</span><br><span class="line">    exit 1</span><br><span class="line">  else</span><br><span class="line">    source $&#123;BUILD_FILE:-buildah.sh&#125; &gt;$LOG_FILE 2&gt;$LOG_FILE</span><br><span class="line">    [ $? -ne 0 ] &amp;&amp; echo &quot;build with buildah failed!&quot; &amp;&amp; exit 1</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">execute package</span></span><br><span class="line">do_oci_package() &#123;</span><br><span class="line">  echo &quot;begin oci package,PACKAGE_STRATEGY=$PACKAGE_STRATEGY&quot;</span><br><span class="line">  if [ $PACKAGE_STRATEGY = &quot;Dockerfile&quot; ]; then</span><br><span class="line">    package_oci_image_for_docker</span><br><span class="line">  elif [ $PACKAGE_STRATEGY = &quot;buildah&quot; ]; then</span><br><span class="line">    package_oci_image</span><br><span class="line">  else</span><br><span class="line">    echo &quot;unknown package strategy: $PACKAGE_STRATEGY&quot; &amp;&amp; exit 1</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">[[ -z &quot;$IMAGE_INFO&quot; ]] &amp;&amp; echo &quot;please set image info (like: -i nginx:v1)&quot; &amp;&amp; exit</span><br><span class="line">make_preparations</span><br><span class="line">[ $PACKAGE_FLAG = &quot;true&quot; ] &amp;&amp; do_compile</span><br><span class="line">[ $BUILD_FLAG = &quot;true&quot; ] &amp;&amp; do_oci_package</span><br><span class="line">[ $PUSH_FLAG = &quot;true&quot; ] &amp;&amp; push_image</span><br><span class="line"></span><br><span class="line">echo &quot;--------- done! ---------&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>构建机器执行package-oci.sh</p>
+<p>配置环境变量REMOTE_IMAGE_REGISTRY为远程仓库地址，默认使用<code>http://127.0.0.1:5000</code>。</p>
+<p>执行<code>./package-oci.sh -p /path/to/project -i demo:v1</code>。即可推送oci镜像到指定远程仓库。</p>
+<p>详细配置如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">-p, --project-home                      项目根目录，如/home/projects/springboot-demo，默认为当前目录</span><br><span class="line">-i, --image-info                        镜像信息，包含镜像名以及版本，格式同docker，[imageName:version]，如nginx:v1</span><br><span class="line">-s, --package-strategy                  打包策略接受参数[ Dockerfile(default) | buildah ]，是使用Dockerfile的方式，还是使用buildah的方式。如果是Dockerfile方式，项目根目录下需要有Dockerfile文件，如果是buildah方式，则项目根目录下需要有buildah.sh文件</span><br><span class="line">-b, --build-file                        打包执行文件路径，Dockerfile或者buildah.sh，如果值为Dockerfile，将默认使用Dockerfile打包策略，否则使用buildah打包策略</span><br><span class="line">    --push-flag                         是否发布到远程仓库,true or false(default)</span><br><span class="line">-h, --help                  			帮助选项。</span><br></pre></td></tr></table></figure>
+
+
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/OCI/" rel="tag"># OCI</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/03/08/%E6%8E%A2%E7%A9%B6OCI%E9%95%9C%E5%83%8F%E4%B8%8EDocker%E9%95%9C%E5%83%8F%E7%9A%84%E8%81%94%E7%B3%BB/" rel="prev" title="探究OCI镜像与Docker镜像的联系">
+                  <i class="fa fa-chevron-left"></i> 探究OCI镜像与Docker镜像的联系
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/07/31/Docker%20Compose%E5%85%A5%E9%97%A8/" rel="next" title="Docker Compose入门">
+                  Docker Compose入门 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">你丶一顾倾城</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"skywaterliu/skywaterliu.github.io","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

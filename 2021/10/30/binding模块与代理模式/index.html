@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"skywaterliu.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.11.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":true,"nav":{"utterances":{"order":-1}},"activeClass":"utterances"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="MyBatis-binding模块与代理模式 Mybatis通过SqlSession来进行CRUD，其所调用的sql使用id标识存放在xml中，可以通过SqlSession提供的一些方法进行调用，其中一种是传入sql的id与所要使用的参数  1 2 3 4 5   public interface SqlSession extends Closeable {     &#x2F;&#x2F; ... 	 List s">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MyBatis-binding模块与代理模式">
+<meta property="og:url" content="https://skywaterliu.github.io/2021/10/30/binding%E6%A8%A1%E5%9D%97%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/index.html">
+<meta property="og:site_name" content="安之一隅">
+<meta property="og:description" content="MyBatis-binding模块与代理模式 Mybatis通过SqlSession来进行CRUD，其所调用的sql使用id标识存放在xml中，可以通过SqlSession提供的一些方法进行调用，其中一种是传入sql的id与所要使用的参数  1 2 3 4 5   public interface SqlSession extends Closeable {     &#x2F;&#x2F; ... 	 List s">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/06/23/dkGSLZHyOCBNsqx.png">
+<meta property="og:image" content="https://i.loli.net/2021/06/23/ktDrzYAsnZxGvP7.png">
+<meta property="og:image" content="https://i.loli.net/2021/06/23/jO3goG2WzPJMEwd.png">
+<meta property="og:image" content="https://i.loli.net/2021/06/23/rPaeipg8kfdjqnY.png">
+<meta property="og:image" content="https://i.loli.net/2021/11/02/SmVcOzkMAaN96XW.png">
+<meta property="article:published_time" content="2021-10-29T23:10:00.000Z">
+<meta property="article:modified_time" content="2022-04-16T08:27:54.366Z">
+<meta property="article:author" content="你丶一顾倾城">
+<meta property="article:tag" content="mybatis">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/06/23/dkGSLZHyOCBNsqx.png">
+
+
+<link rel="canonical" href="https://skywaterliu.github.io/2021/10/30/binding%E6%A8%A1%E5%9D%97%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://skywaterliu.github.io/2021/10/30/binding%E6%A8%A1%E5%9D%97%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/","path":"2021/10/30/binding模块与代理模式/","title":"MyBatis-binding模块与代理模式"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>MyBatis-binding模块与代理模式 | 安之一隅</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">安之一隅</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">莫听穿林打叶声，何妨吟啸且徐行。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MyBatis-binding%E6%A8%A1%E5%9D%97%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F"><span class="nav-number">1.</span> <span class="nav-text">MyBatis-binding模块与代理模式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MapperRegistry"><span class="nav-number">1.1.</span> <span class="nav-text">MapperRegistry</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MapperProxyFactory"><span class="nav-number">1.2.</span> <span class="nav-text">MapperProxyFactory</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MapperProxy"><span class="nav-number">1.3.</span> <span class="nav-text">MapperProxy</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">你丶一顾倾城</p>
+  <div class="site-description" itemprop="description">嗨害嗨！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/skywaterliu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;skywaterliu" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:liutianshui17@gmail.com" title="E-Mail → mailto:liutianshui17@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://skywaterliu.github.io/2021/10/30/binding%E6%A8%A1%E5%9D%97%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="你丶一顾倾城">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="安之一隅">
+      <meta itemprop="description" content="嗨害嗨！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="MyBatis-binding模块与代理模式 | 安之一隅">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MyBatis-binding模块与代理模式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-10-30 07:10:00" itemprop="dateCreated datePublished" datetime="2021-10-30T07:10:00+08:00">2021-10-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-04-16 16:27:54" itemprop="dateModified" datetime="2022-04-16T16:27:54+08:00">2022-04-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%90%8E%E7%AB%AF/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="MyBatis-binding模块与代理模式"><a href="#MyBatis-binding模块与代理模式" class="headerlink" title="MyBatis-binding模块与代理模式"></a>MyBatis-binding模块与代理模式</h1><p>Mybatis通过SqlSession来进行CRUD，其所调用的sql使用id标识存放在xml中，可以通过SqlSession提供的一些方法进行调用，其中一种是传入sql的id与所要使用的参数</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">SqlSession</span> <span class="keyword">extends</span> <span class="title class_">Closeable</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">	&lt;E&gt; List&lt;E&gt; <span class="title function_">selectList</span><span class="params">(String statement, Object parameter)</span>;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但这样做有一个缺点，经常用ibatis的话，可能深有体会，如果statement填写错了，只能在运行时才能发现，对于开发来说难免会又写错的时候，总会浪费一些时间。</p>
+<p>还有一种更加优雅的调用方式，先定义一个Mapper接口，</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ProductMapper</span> &#123;</span><br><span class="line">    List&lt;Product&gt; <span class="title function_">queryProduct</span><span class="params">(Long prodId)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>建立一个Mapper.xml，接口名对应到Mapper.xml的namespace，接口的方法名对应到xml中的SQL id。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">select</span> <span class="attr">id</span>=<span class="string">&quot;queryProduct&quot;</span> <span class="attr">resultMap</span>=<span class="string">&quot;productResultMap&quot;</span>&gt;</span></span><br><span class="line">    select xxx from t_product</span><br><span class="line"><span class="tag">&lt;/<span class="name">select</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>调用getMapper获取ProductMapper对象，并调用queryProduct方法即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">SqlSession</span> <span class="keyword">extends</span> <span class="title class_">Closeable</span> &#123;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">	&lt;T&gt; T <span class="title function_">getMapper</span><span class="params">(Class&lt;T&gt; type)</span>;</span><br><span class="line">    <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样，可以在mybatis启动时就进行检测，接口是否有对应的sql id存在，规避了运行时找不到对应sql的风险。</p>
+<p>归根结底，getMapper接口最终还是调用的SqlSession下的各个select、update方法，只是mybatis将其包装了一下更加方便实用。但是具体是怎么实现的？</p>
+<p><strong>主要思路</strong>：使用动态代理，增强Mapper接口中的所有方法。调用方法代理时获取在xml中定义的对应的sql语句，同时获取其方法类型，如<code>select</code>，<code>update</code>，<code>delete</code>等。最终分别调用<code>SqlSession#select</code>，<code>SqlSession#update</code>，<code>SqlSession#delete</code>等方法。</p>
+<p> Mapper的绑定与获取主要由binding模块负责。</p>
+<p><img src="https://i.loli.net/2021/06/23/dkGSLZHyOCBNsqx.png" alt="image-20210623201716653.png"></p>
+<p>重要的四个类：</p>
+<ul>
+<li>MapperRegistry</li>
+<li>MapperProxyFactory</li>
+<li>MapperProxy</li>
+<li>MapperMethod</li>
+</ul>
+<h2 id="MapperRegistry"><a href="#MapperRegistry" class="headerlink" title="MapperRegistry"></a>MapperRegistry</h2><p><img src="https://i.loli.net/2021/06/23/ktDrzYAsnZxGvP7.png" alt="image-20210623202055621"></p>
+<p>该类注册了所有的Mapper接口以及其对应的被代理的方法。</p>
+<p>所包含成员有：</p>
+<p><strong>config</strong>：All-in-One 的Mybatis全局配置</p>
+<p><strong>knowMappers</strong>：所有被加载的Mapper，key为Mapper的Class对象，Value为生产Mapper代理的工厂类<code>MapperProxyFactory</code>。</p>
+<p>追踪SqlSession的getMapper方法发现，</p>
+<p><img src="https://i.loli.net/2021/06/23/jO3goG2WzPJMEwd.png" alt="image-20210623220422636"></p>
+<p>其最终调用的就是MapperRegistry中的getMapper方法。</p>
+<p><strong>MapperRegistry.getMapper</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;T&gt; T <span class="title function_">getMapper</span><span class="params">(Class&lt;T&gt; type, SqlSession sqlSession)</span> &#123;</span><br><span class="line">    <span class="comment">// 步骤一</span></span><br><span class="line">  <span class="keyword">final</span> MapperProxyFactory&lt;T&gt; mapperProxyFactory = (MapperProxyFactory&lt;T&gt;) knownMappers.get(type);</span><br><span class="line">  <span class="keyword">if</span> (mapperProxyFactory == <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">BindingException</span>(<span class="string">&quot;Type &quot;</span> + type + <span class="string">&quot; is not known to the MapperRegistry.&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="comment">// 步骤二</span></span><br><span class="line">    <span class="keyword">return</span> mapperProxyFactory.newInstance(sqlSession);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">BindingException</span>(<span class="string">&quot;Error getting mapper instance. Cause: &quot;</span> + e, e);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>步骤一，从<code>knowMappers</code>中获取该接口对应的代理工厂。如果没有则抛出异常。</p>
+<p>步骤二，通过代理工厂生成该接口的代理对象。</p>
+<h2 id="MapperProxyFactory"><a href="#MapperProxyFactory" class="headerlink" title="MapperProxyFactory"></a>MapperProxyFactory</h2><p><img src="https://i.loli.net/2021/06/23/rPaeipg8kfdjqnY.png" alt="image-20210623222421215"></p>
+<p>MapperProxyFactory的主要作用就是生成Mapper的Proxy对象。</p>
+<p>为什么没有在MapperRegistry直接生成代理对象，而要使用<strong>工厂模式</strong>？工厂模式的作用是为了屏蔽复杂的对象创建过程。这里生成Proxy，需要调用Proxy对象的构造，其构造参数<code>methodCache</code>也是在Factory中进行初始化的。</p>
+<p>成员mapperInterface即是当前需要生产代理类的Mapper的class对象。</p>
+<p>成员methodCache用于维护该工厂处理的对应Mapper中的Method与对应的MapperMethodInvoker之间的映射。在使用过程中调用Mapper中的某个方法时，可以拿到该方法对应的具体sql信息。MapperMethodInvoker的具体实现是在MapperProxy中定义的，这里只是新建立相关缓存，并将缓存的引用传递给MapperProxy的构造。</p>
+<p>下面看下<strong>代理模式</strong>是如何具体实践的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MapperProxyFactory</span>&lt;T&gt; &#123;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> Class&lt;T&gt; mapperInterface;</span><br><span class="line">   <span class="keyword">private</span> <span class="keyword">final</span> Map&lt;Method, MapperMethodInvoker&gt; methodCache = <span class="keyword">new</span> <span class="title class_">ConcurrentHashMap</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">public</span> <span class="title function_">MapperProxyFactory</span><span class="params">(Class&lt;T&gt; mapperInterface)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.mapperInterface = mapperInterface;</span><br><span class="line">  &#125;</span><br><span class="line">	<span class="comment">// 具体生成代理对象的地方</span></span><br><span class="line">  <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">  <span class="keyword">protected</span> T <span class="title function_">newInstance</span><span class="params">(MapperProxy&lt;T&gt; mapperProxy)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (T) Proxy.newProxyInstance(mapperInterface.getClassLoader(), <span class="keyword">new</span> <span class="title class_">Class</span>[] &#123; mapperInterface &#125;, mapperProxy);</span><br><span class="line">  &#125;</span><br><span class="line">	<span class="comment">// 主要调用方法</span></span><br><span class="line">  <span class="keyword">public</span> T <span class="title function_">newInstance</span><span class="params">(SqlSession sqlSession)</span> &#123;</span><br><span class="line">      <span class="comment">// 步骤一</span></span><br><span class="line">    <span class="keyword">final</span> MapperProxy&lt;T&gt; mapperProxy = <span class="keyword">new</span> <span class="title class_">MapperProxy</span>&lt;&gt;(sqlSession, mapperInterface, methodCache);</span><br><span class="line">    <span class="keyword">return</span> newInstance(mapperProxy);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>通常会调用<code>newInstance(SqlSession sqlSession)</code>，传入一个SqlSession生成该工厂对应Mapper的代理。</p>
+<p>步骤一，通过传入<code>sqlSession</code>,对应的Mapper的class对象,以及其方法缓存引用，构造一个MapperProxy，这个MapperProxy即是典型的动态代理，实现了<code>InvocationHanler</code>接口，作为代理对象。</p>
+<p>步骤二，通过<code>Proxy.newProxyInstance</code>生成动态代理对象。</p>
+<p>代理对象需要做的，就是重新实现被代理接口的方法，所以会需要一个入参是被代理接口，即mapperInterface，最后一个入参MapperProxy也一定是InvokationHandler的实现类。具体看下MapperProxy。</p>
+<h2 id="MapperProxy"><a href="#MapperProxy" class="headerlink" title="MapperProxy"></a>MapperProxy</h2><p>见名知义了，它会成为Mapper接口的具体实现。重点在于invoke方法的实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (Object.class.equals(method.getDeclaringClass())) &#123;</span><br><span class="line">      <span class="keyword">return</span> method.invoke(<span class="built_in">this</span>, args);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> cachedInvoker(method).invoke(proxy, method, args, sqlSession);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125; <span class="comment">// ignore catch statement</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> MapperMethodInvoker <span class="title function_">cachedInvoker</span><span class="params">(Method method)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="comment">// ......上面省略一些，下面主要先判断java版本，对default方法做特殊处理，直接执行。</span></span><br><span class="line">    <span class="keyword">return</span> methodCache.computeIfAbsent(method, m -&gt; &#123;</span><br><span class="line">      <span class="keyword">if</span> (m.isDefault()) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="keyword">if</span> (privateLookupInMethod == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DefaultMethodInvoker</span>(getMethodHandleJava8(method));</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DefaultMethodInvoker</span>(getMethodHandleJava9(method));</span><br><span class="line">          &#125;</span><br><span class="line">        &#125; <span class="comment">// ignore catch statement</span></span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          <span class="comment">// 如果是普通的方法，则需要做一些具体的操作。</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">PlainMethodInvoker</span>(<span class="keyword">new</span> <span class="title class_">MapperMethod</span>(mapperInterface, method, sqlSession.getConfiguration()));</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125; <span class="comment">// ignore catch statement</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每个方法会映射到一个执行器MethodInvoker，并将执行器添加到Cache中，方便下一次调用。default方法会执行DefaultMethodInvoker，而普通方法则是调用的PlainMethodInvoker，期间生成对应的方法抽象，即MapperMethod。</p>
+<p>MethodInvoker中包含了MapperMethod,这个MapperMethod就是我们常常使用的接口中的具体方法了，最终调用MethodInvoker.invoke方法。invoke的实现一般就是调用MapperMethod的execute方法，execute中会具体调用select，update，delete，insert相关SqlSession操作。</p>
+<p><img src="https://i.loli.net/2021/11/02/SmVcOzkMAaN96XW.png" alt="image-20211102223247628"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>binding模块是一个典型的动态代理的使用案例，通过面向mapper接口，解决启动时检查statement的正确性，调用sql的行为也变得更为优雅，入参也可以直接定义在方法签名中，而不是一味的使用如SqlSession的select方法，传入一个让人捉摸不透的Object参数（参数解析不属于binding模块）。</p>
+<p>可见，使用mapper接口的好处是有很多的，动态代理也让一系列复杂的过程变得对开发人员透明，设计思路十分值得学习。譬如我们在写RPC调用时，很多时候也是面向接口api的，通过Proxy，也可以让一系列非业务逻辑代码变得透明，如同调用本地的方法一般进行rpc，开发也可以更聚焦于业务。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mybatis/" rel="tag"># mybatis</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/10/25/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88%E4%B8%8E%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/" rel="prev" title="单点登录方案与实现总结">
+                  <i class="fa fa-chevron-left"></i> 单点登录方案与实现总结
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/01/08/Java%E5%B9%B6%E5%8F%91-AQS%E8%A7%A3%E6%9E%90/" rel="next" title="Java并发-AQS解析">
+                  Java并发-AQS解析 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">你丶一顾倾城</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"skywaterliu/skywaterliu.github.io","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

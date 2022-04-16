@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"skywaterliu.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.11.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":true,"nav":{"utterances":{"order":-1}},"activeClass":"utterances"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="当前用户 root 当前目录 &#x2F;root&#x2F;app&#x2F;rabbitmq  相关依赖 安装erlang 访问https:&#x2F;&#x2F;packagecloud.io&#x2F;rabbitmq&#x2F;erlang&#x2F;install 执行  1 2   curl -s https:&#x2F;&#x2F;packagecloud.io&#x2F;install&#x2F;repositories&#x2F;rabbitmq&#x2F;erlang&#x2F;script.rpm.sh | sudo b">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS-7下安装RabbitMQ">
+<meta property="og:url" content="https://skywaterliu.github.io/2019/05/01/CentOS-7%E4%B8%8B%E5%AE%89%E8%A3%85RabbitMQ/index.html">
+<meta property="og:site_name" content="安之一隅">
+<meta property="og:description" content="当前用户 root 当前目录 &#x2F;root&#x2F;app&#x2F;rabbitmq  相关依赖 安装erlang 访问https:&#x2F;&#x2F;packagecloud.io&#x2F;rabbitmq&#x2F;erlang&#x2F;install 执行  1 2   curl -s https:&#x2F;&#x2F;packagecloud.io&#x2F;install&#x2F;repositories&#x2F;rabbitmq&#x2F;erlang&#x2F;script.rpm.sh | sudo b">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-05-01T07:58:00.000Z">
+<meta property="article:modified_time" content="2019-07-15T07:56:26.891Z">
+<meta property="article:author" content="你丶一顾倾城">
+<meta property="article:tag" content="环境搭建">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://skywaterliu.github.io/2019/05/01/CentOS-7%E4%B8%8B%E5%AE%89%E8%A3%85RabbitMQ/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://skywaterliu.github.io/2019/05/01/CentOS-7%E4%B8%8B%E5%AE%89%E8%A3%85RabbitMQ/","path":"2019/05/01/CentOS-7下安装RabbitMQ/","title":"CentOS-7下安装RabbitMQ"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CentOS-7下安装RabbitMQ | 安之一隅</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">安之一隅</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">莫听穿林打叶声，何妨吟啸且徐行。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E4%BE%9D%E8%B5%96"><span class="nav-number">1.</span> <span class="nav-text">相关依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85erlang"><span class="nav-number">1.1.</span> <span class="nav-text">安装erlang</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85rabbitmq-server"><span class="nav-number">2.</span> <span class="nav-text">安装rabbitmq-server</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%BB%93%E5%BA%93%E5%B9%B6%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.</span> <span class="nav-text">添加仓库并安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%90%AF%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6"><span class="nav-number">2.2.</span> <span class="nav-text">开启远程访问限制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BC%80%E5%90%AFweb%E8%AE%BF%E9%97%AE%EF%BC%88%E9%9C%80%E8%A6%81%E5%85%88%E5%BC%80%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AE%E9%99%90%E5%88%B6%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">开启web访问（需要先开远程访问限制）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E6%B6%88%E6%81%AF%E5%BB%B6%E8%BF%9F%E6%8F%92%E4%BB%B6"><span class="nav-number">2.4.</span> <span class="nav-text">安装消息延迟插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%BE%E8%A1%8C%E7%AB%AF%E5%8F%A3"><span class="nav-number">2.5.</span> <span class="nav-text">放行端口</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8-x2F-%E5%81%9C%E6%AD%A2-x2F-%E9%87%8D%E5%90%AF%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.6.</span> <span class="nav-text">启动&#x2F;停止&#x2F;重启服务</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E7%8A%B6%E6%80%81"><span class="nav-number">2.7.</span> <span class="nav-text">查看状态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E4%B8%BA%E5%BC%80%E6%9C%BA%E8%87%AA%E5%8A%A8%E5%90%AF%E5%8A%A8"><span class="nav-number">2.8.</span> <span class="nav-text">设为开机自动启动</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">你丶一顾倾城</p>
+  <div class="site-description" itemprop="description">嗨害嗨！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/skywaterliu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;skywaterliu" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:liutianshui17@gmail.com" title="E-Mail → mailto:liutianshui17@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://skywaterliu.github.io/2019/05/01/CentOS-7%E4%B8%8B%E5%AE%89%E8%A3%85RabbitMQ/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="你丶一顾倾城">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="安之一隅">
+      <meta itemprop="description" content="嗨害嗨！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CentOS-7下安装RabbitMQ | 安之一隅">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CentOS-7下安装RabbitMQ
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-05-01 15:58:00" itemprop="dateCreated datePublished" datetime="2019-05-01T15:58:00+08:00">2019-05-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2019-07-15 15:56:26" itemprop="dateModified" datetime="2019-07-15T15:56:26+08:00">2019-07-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/RabbitMQ/" itemprop="url" rel="index"><span itemprop="name">RabbitMQ</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <!-- toc -->
+
+<span id="more"></span>
+
+<blockquote>
+<p>当前用户 root<br>当前目录 &#x2F;root&#x2F;app&#x2F;rabbitmq</p>
+</blockquote>
+<h2 id="相关依赖"><a href="#相关依赖" class="headerlink" title="相关依赖"></a>相关依赖</h2><h3 id="安装erlang"><a href="#安装erlang" class="headerlink" title="安装erlang"></a>安装erlang</h3><p>访问<a target="_blank" rel="noopener" href="https://packagecloud.io/rabbitmq/erlang/install">https://packagecloud.io/rabbitmq/erlang/install</a><br>执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -s https://packagecloud.io/install/repositories/rabbitmq/erlang/script.rpm.sh | sudo bash</span><br><span class="line">yum install erlang-20.3.8.18-1.el7.centos.x86_64</span><br></pre></td></tr></table></figure>
+<h2 id="安装rabbitmq-server"><a href="#安装rabbitmq-server" class="headerlink" title="安装rabbitmq-server"></a>安装rabbitmq-server</h2><h3 id="添加仓库并安装"><a href="#添加仓库并安装" class="headerlink" title="添加仓库并安装"></a>添加仓库并安装</h3><p>访问<a target="_blank" rel="noopener" href="https://packagecloud.io/rabbitmq/rabbitmq-server/install#bash-rpm">https://packagecloud.io/rabbitmq/rabbitmq-server/install#bash-rpm</a><br>执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-server/script.rpm.sh | sudo bash</span><br><span class="line">yum install rabbitmq-server</span><br></pre></td></tr></table></figure>
+<p>更多安装方式参见RabbitMQ官方说明<br><a target="_blank" rel="noopener" href="https://www.rabbitmq.com/install-rpm.html#package-cloud">https://www.rabbitmq.com/install-rpm.html#package-cloud</a><br>推荐使用Package Cloud提供的脚本</p>
+<h3 id="开启远程访问限制"><a href="#开启远程访问限制" class="headerlink" title="开启远程访问限制"></a>开启远程访问限制</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/rabbitmq/rabbitmq.config</span><br></pre></td></tr></table></figure>
+<p>添加如下内容</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[&#123;rabbit,[&#123;loopback_users,[]&#125;]&#125;].</span><br></pre></td></tr></table></figure>
+<p><strong>注意，最后面的 . 不要漏掉</strong></p>
+<h3 id="开启web访问（需要先开远程访问限制）"><a href="#开启web访问（需要先开远程访问限制）" class="headerlink" title="开启web访问（需要先开远程访问限制）"></a>开启web访问（需要先开远程访问限制）</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@arcgisserver app]# rabbitmq-plugins enable rabbitmq_management</span><br></pre></td></tr></table></figure>
+<p>这里报了个错：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">19:54:27.271 [error] Cookie file /var/lib/rabbitmq/.erlang.cookie must be accessible by owner only</span><br><span class="line"></span><br><span class="line">19:54:28.070 [error] Cookie file /var/lib/rabbitmq/.erlang.cookie must be accessible by owner only</span><br><span class="line">...</span><br><span class="line">Distribution failed: &#123;&#123;:shutdown, &#123;:failed_to_start_child, :auth, &#123;&#x27;Cookie file /var/lib/rabbitmq/.erlang.cookie must be accessible by owner only&#x27;, [&#123;:auth, :init_cookie, 0, [file: &#x27;auth.erl&#x27;, line: 286]&#125;, &#123;:auth, :init, 1, [file: &#x27;auth.erl&#x27;, line: 140]&#125;, &#123;:gen_server, :init_it, 2, [file: &#x27;gen_server.erl&#x27;, line: 374]&#125;, &#123;:gen_server, :init_it, 6, [file: &#x27;gen_server.erl&#x27;, line: 342]&#125;, &#123;:proc_lib, :init_p_do_apply, 3, [file: &#x27;proc_lib.erl&#x27;, line: 249]&#125;]&#125;&#125;&#125;, &#123;:child, :undefined, :net_sup_dynamic, &#123;:erl_distribution, :start_link, [[:rabbitmqcli61, :shortnames], false]&#125;, :permanent, 1000, :supervisor, [:erl_distribution]&#125;&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>看起来貌似是当前用户没权限，那就赋各权限吧。。。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@arcgisserver app]# chmod 600 /var/lib/rabbitmq/.erlang.cookie</span><br></pre></td></tr></table></figure>
+<p>重新执行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[root@arcgisserver app]# rabbitmq-plugins enable rabbitmq_management</span><br><span class="line">The following plugins have been configured:</span><br><span class="line">  rabbitmq_management</span><br><span class="line">  rabbitmq_management_agent</span><br><span class="line">  rabbitmq_web_dispatch</span><br><span class="line">Applying plugin configuration to rabbit@arcgisserver...</span><br><span class="line">The following plugins have been enabled:</span><br><span class="line">  rabbitmq_management</span><br><span class="line">  rabbitmq_management_agent</span><br><span class="line">  rabbitmq_web_dispatch</span><br><span class="line"></span><br><span class="line">set 3 plugins.</span><br><span class="line">Offline change; changes will take effect at broker restart.</span><br></pre></td></tr></table></figure>
+<p>搞定</p>
+<h3 id="安装消息延迟插件"><a href="#安装消息延迟插件" class="headerlink" title="安装消息延迟插件"></a>安装消息延迟插件</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[root@arcgisserver plugins]# cd /usr/lib/rabbitmq/lib/rabbitmq_server-3.7.14/plugins</span><br><span class="line"></span><br><span class="line">[root@arcgisserver plugins]# wget https://dl.bintray.com/rabbitmq/community-plugins/rabbitmq_delayed_message_exchange-0.0.1.ez</span><br><span class="line">--2018-11-11 21:29:43--  https://dl.bintray.com/rabbitmq/community-plugins/rabbitmq_delayed_message_exchange-0.0.1.ez</span><br><span class="line">Resolving dl.bintray.com (dl.bintray.com)... 75.126.118.188</span><br><span class="line">Connecting to dl.bintray.com (dl.bintray.com)|75.126.118.188|:443... connected.</span><br><span class="line">HTTP request sent, awaiting response... 200 OK</span><br><span class="line">Length: 32019 (31K) [application/octet-stream]</span><br><span class="line">Saving to: ‘rabbitmq_delayed_message_exchange-0.0.1.ez’</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">100%</span><span class="language-bash">[=================================================================================================&gt;] 32,019      22.7KB/s   <span class="keyword">in</span> 1.4s</span>   </span><br><span class="line">2018-11-11 21:29:46 (22.7 KB/s) - ‘rabbitmq_delayed_message_exchange-0.0.1.ez’ saved [32019/32019]</span><br><span class="line"></span><br><span class="line">[root@arcgisserver plugins]# rabbitmq-plugins enable rabbitmq_delayed_message_exchange</span><br><span class="line">The following plugins have been configured:</span><br><span class="line">  rabbitmq_delayed_message_exchange</span><br><span class="line">  rabbitmq_management</span><br><span class="line">  rabbitmq_management_agent</span><br><span class="line">  rabbitmq_web_dispatch</span><br><span class="line">Applying plugin configuration to rabbit@arcgisserver...</span><br><span class="line">The following plugins have been enabled:</span><br><span class="line">  rabbitmq_delayed_message_exchange</span><br><span class="line"></span><br><span class="line">set 4 plugins.</span><br><span class="line">Offline change; changes will take effect at broker restart.</span><br></pre></td></tr></table></figure>
+
+<h3 id="放行端口"><a href="#放行端口" class="headerlink" title="放行端口"></a>放行端口</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">firewall-cmd --zone=public --add-port=15672/tcp --permanent</span><br><span class="line">firewall-cmd --zone=public --add-port=5672/tcp --permanent</span><br><span class="line">systemctl restart firewalld.service</span><br></pre></td></tr></table></figure>
+
+<h3 id="启动-x2F-停止-x2F-重启服务"><a href="#启动-x2F-停止-x2F-重启服务" class="headerlink" title="启动&#x2F;停止&#x2F;重启服务"></a>启动&#x2F;停止&#x2F;重启服务</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">systemctl start rabbitmq-server.service</span><br><span class="line">systemctl stop rabbitmq-server.service</span><br><span class="line">systemctl restart rabbitmq-server.service</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">启动rabbitmq，-detached代表后台守护进程方式启动。</span></span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">rabbitmq-server -detached</span> </span><br></pre></td></tr></table></figure>
+<h3 id="查看状态"><a href="#查看状态" class="headerlink" title="查看状态"></a>查看状态</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rabbitmqctl status</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="设为开机自动启动"><a href="#设为开机自动启动" class="headerlink" title="设为开机自动启动"></a>设为开机自动启动</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">chkconfig rabbitmq-server on</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag"># 环境搭建</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/12/03/Spring%20AOP%20%E5%B5%8C%E5%A5%97%E4%BD%BF%E7%94%A8%E6%97%B6%E5%86%85%E9%83%A8%E6%96%B9%E6%B3%95%E6%B3%A8%E8%A7%A3%E5%A4%B1%E6%95%88%E9%97%AE%E9%A2%98/" rel="prev" title="Spring AOP 嵌套使用时内部方法注解失效问题">
+                  <i class="fa fa-chevron-left"></i> Spring AOP 嵌套使用时内部方法注解失效问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2019/06/13/IDEA%E9%9B%86%E6%88%90Resin%E5%90%AF%E5%8A%A8Maven%E9%A1%B9%E7%9B%AE/" rel="next" title="IDEA集成Resin启动Maven项目">
+                  IDEA集成Resin启动Maven项目 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">你丶一顾倾城</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"skywaterliu/skywaterliu.github.io","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

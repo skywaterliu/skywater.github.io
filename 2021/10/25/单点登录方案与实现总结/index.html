@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"skywaterliu.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.11.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":true,"nav":{"utterances":{"order":-1}},"activeClass":"utterances"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="单点登录方案与实现总结 何为登录？ 众所周知，http是一个无状态协议。何为无状态？举几个有状态协议的例子，譬如TCP协议，需要三次握手，握手完成后双方及建立了连接，可以互相传输数据，传输完成后会断开连接。在譬如websocket，是一个全双工协议，也需要双方建立连接与断开连接。可曾听说过断开http连接？好像没有这回事吧，只有这次http请求200了，还是500报错了这种说法，因为http是无状">
+<meta property="og:type" content="article">
+<meta property="og:title" content="单点登录方案与实现总结">
+<meta property="og:url" content="https://skywaterliu.github.io/2021/10/25/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88%E4%B8%8E%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/index.html">
+<meta property="og:site_name" content="安之一隅">
+<meta property="og:description" content="单点登录方案与实现总结 何为登录？ 众所周知，http是一个无状态协议。何为无状态？举几个有状态协议的例子，譬如TCP协议，需要三次握手，握手完成后双方及建立了连接，可以互相传输数据，传输完成后会断开连接。在譬如websocket，是一个全双工协议，也需要双方建立连接与断开连接。可曾听说过断开http连接？好像没有这回事吧，只有这次http请求200了，还是500报错了这种说法，因为http是无状">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/10/22/ep5rTWFE3iD6gQo.png">
+<meta property="og:image" content="https://i.loli.net/2021/10/25/PMk2BLFYNjonsTw.png">
+<meta property="og:image" content="https://i.loli.net/2021/10/22/4Nk3YwLAO2hqxE9.png">
+<meta property="og:image" content="https://i.loli.net/2021/10/25/1utsRxE3fLDnaCI.png">
+<meta property="og:image" content="https://i.loli.net/2021/10/25/pe7z5BGtn39jJ6o.png">
+<meta property="og:image" content="https://i.loli.net/2021/10/25/T2Juc9YKoLaI5fP.png">
+<meta property="og:image" content="https://i.loli.net/2021/10/25/yEdHz1soRTPNFJL.png">
+<meta property="og:image" content="https://i.loli.net/2021/10/25/f3Tr9GHPvolBwkh.png">
+<meta property="og:image" content="https://miro.medium.com/max/1050/1*ULF38OTiNJNQZ4lHQZqRwQ.png">
+<meta property="article:published_time" content="2021-10-25T11:35:00.000Z">
+<meta property="article:modified_time" content="2022-04-16T08:41:45.809Z">
+<meta property="article:author" content="你丶一顾倾城">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="sso">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/10/22/ep5rTWFE3iD6gQo.png">
+
+
+<link rel="canonical" href="https://skywaterliu.github.io/2021/10/25/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88%E4%B8%8E%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://skywaterliu.github.io/2021/10/25/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88%E4%B8%8E%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/","path":"2021/10/25/单点登录方案与实现总结/","title":"单点登录方案与实现总结"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>单点登录方案与实现总结 | 安之一隅</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">安之一隅</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">莫听穿林打叶声，何妨吟啸且徐行。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88%E4%B8%8E%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93"><span class="nav-number">1.</span> <span class="nav-text">单点登录方案与实现总结</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%95%E4%B8%BA%E7%99%BB%E5%BD%95%EF%BC%9F"><span class="nav-number">1.1.</span> <span class="nav-text">何为登录？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%95%E4%B8%BA%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%EF%BC%9F"><span class="nav-number">1.2.</span> <span class="nav-text">何为单点登录？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88"><span class="nav-number">1.3.</span> <span class="nav-text">单点登录方案</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%8C%E5%9F%9F%E5%90%8D"><span class="nav-number">1.3.1.</span> <span class="nav-text">同域名</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E7%82%B9%E7%99%BB%E5%87%BA"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">单点登出</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B1%E4%BA%ABSession"><span class="nav-number">1.3.2.</span> <span class="nav-text">共享Session</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E7%82%B9%E7%99%BB%E5%87%BA-1"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">单点登出</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CAS"><span class="nav-number">1.3.3.</span> <span class="nav-text">CAS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5"><span class="nav-number">1.3.3.1.</span> <span class="nav-text">相关概念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#User"><span class="nav-number">1.3.3.1.1.</span> <span class="nav-text">User</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CAS-Server"><span class="nav-number">1.3.3.1.2.</span> <span class="nav-text">CAS Server</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#CAS-Client"><span class="nav-number">1.3.3.1.3.</span> <span class="nav-text">CAS Client</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#TGC-Ticket-granting-cookie"><span class="nav-number">1.3.3.1.4.</span> <span class="nav-text">TGC(Ticket-granting cookie)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#TGT-Ticket-Granting-Ticket"><span class="nav-number">1.3.3.1.5.</span> <span class="nav-text">TGT(Ticket Granting Ticket)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E9%80%BB%E8%BE%91"><span class="nav-number">1.3.3.2.</span> <span class="nav-text">关键逻辑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E7%82%B9%E7%99%BB%E5%87%BA-2"><span class="nav-number">1.3.3.3.</span> <span class="nav-text">单点登出</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OAuth2"><span class="nav-number">1.3.4.</span> <span class="nav-text">OAuth2</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5-1"><span class="nav-number">1.3.4.1.</span> <span class="nav-text">相关概念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#resource-owner-%E8%B5%84%E6%BA%90%E6%89%80%E6%9C%89%E8%80%85"><span class="nav-number">1.3.4.1.1.</span> <span class="nav-text">resource owner(资源所有者)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#resource-server-%E8%B5%84%E6%BA%90%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.3.4.1.2.</span> <span class="nav-text">resource server(资源服务器)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#client-%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="nav-number">1.3.4.1.3.</span> <span class="nav-text">client(客户端)</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#authorization-server-%E6%8E%88%E6%9D%83%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">1.3.4.1.4.</span> <span class="nav-text">authorization server(授权服务器)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E9%80%BB%E8%BE%91-1"><span class="nav-number">1.3.4.2.</span> <span class="nav-text">关键逻辑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E7%82%B9%E7%99%BB%E5%87%BA-3"><span class="nav-number">1.3.4.3.</span> <span class="nav-text">单点登出</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%8ECAS%E5%AF%B9%E6%AF%94"><span class="nav-number">1.3.4.4.</span> <span class="nav-text">与CAS对比</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OIDC-OpenID-Connection"><span class="nav-number">1.3.5.</span> <span class="nav-text">OIDC(OpenID Connection)</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E6%A6%82%E5%BF%B5-2"><span class="nav-number">1.3.5.1.</span> <span class="nav-text">相关概念</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#OpenID-Provider"><span class="nav-number">1.3.5.1.1.</span> <span class="nav-text">OpenID Provider</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#ID-token"><span class="nav-number">1.3.5.1.2.</span> <span class="nav-text">ID token</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#end-user"><span class="nav-number">1.3.5.1.3.</span> <span class="nav-text">end-user</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#userinfo-endpoint"><span class="nav-number">1.3.5.1.4.</span> <span class="nav-text">userinfo endpoint</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#scope%E6%A0%87%E5%87%86%E5%8C%96"><span class="nav-number">1.3.5.1.5.</span> <span class="nav-text">scope标准化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Claim"><span class="nav-number">1.3.5.1.6.</span> <span class="nav-text">Claim</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%95%E7%82%B9%E7%99%BB%E5%87%BA-4"><span class="nav-number">1.3.5.2.</span> <span class="nav-text">单点登出</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">你丶一顾倾城</p>
+  <div class="site-description" itemprop="description">嗨害嗨！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/skywaterliu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;skywaterliu" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:liutianshui17@gmail.com" title="E-Mail → mailto:liutianshui17@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://skywaterliu.github.io/2021/10/25/%E5%8D%95%E7%82%B9%E7%99%BB%E5%BD%95%E6%96%B9%E6%A1%88%E4%B8%8E%E5%AE%9E%E7%8E%B0%E6%80%BB%E7%BB%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="你丶一顾倾城">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="安之一隅">
+      <meta itemprop="description" content="嗨害嗨！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="单点登录方案与实现总结 | 安之一隅">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          单点登录方案与实现总结
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2021-10-25 19:35:00" itemprop="dateCreated datePublished" datetime="2021-10-25T19:35:00+08:00">2021-10-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-04-16 16:41:45" itemprop="dateModified" datetime="2022-04-16T16:41:45+08:00">2022-04-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%90%8E%E7%AB%AF/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="单点登录方案与实现总结"><a href="#单点登录方案与实现总结" class="headerlink" title="单点登录方案与实现总结"></a>单点登录方案与实现总结</h1><h2 id="何为登录？"><a href="#何为登录？" class="headerlink" title="何为登录？"></a>何为登录？</h2><p>众所周知，http是一个无状态协议。何为无状态？举几个有状态协议的例子，譬如TCP协议，需要三次握手，握手完成后双方及<strong>建立了连接</strong>，可以互相传输数据，传输完成后会<strong>断开连接</strong>。在譬如websocket，是一个全双工协议，也需要双方建立连接与断开连接。可曾听说过<strong>断开http连接</strong>？好像没有这回事吧，只有这次http请求200了，还是500报错了这种说法，因为http是无状态的，这次发的http请求与下一次并没有联系，也就不存在断开的概念。</p>
+<p>看这样的场景，我需要访问某个网站的属于我的数据了，我发了一个http请求，这次http带有了用户凭据（用户密码），被认证为有权限访问资源，ok，获取到了，那下次再访问这个资源，难道我还需要再输一遍密码么，那也太麻烦了。我怎么样才能让对方知道，我输过密码认证成功是我本人了，就算做我进入“登录状态”了呢？</p>
+<p>于是，有了这样一个方案，认证成功后，服务端（对方网站服务器）与客户端（我的浏览器）都记录下同一个值，这个值一般就叫做”JSESSIONID”。如何记录？服务端认证成功，便生成这个值存于其本地，并将其塞入我的Cookie，返回给我，我每次后续的http请求，Cookie都带上这个”JSESSIONID”，服务端找到本地对应的Session信息校验这个Cookie的有效性（真伪&#x2F;是否到期），有效则返回我的受保护资源。这样，我和目标网站之间就在多个无状态的http请求之间维护出一个登陆状态，靠的就是这个Session值。</p>
+<p>然而，这样的方案是有局限性的，Cookie只在同域名下有效，而对方名下有多个网站，都用的一套的用户名密码，我在切换网站时却要重新输入密码，因为域名不同，Cookie失效了，”JSESSIONID”无法带过去了。怎么办？单点登录得出马了。</p>
+<h2 id="何为单点登录？"><a href="#何为单点登录？" class="headerlink" title="何为单点登录？"></a>何为单点登录？</h2><p>单点登录（Single Sign On），简称为SSO，即在用户登录一次，即可直接获取多个相互信任的应用（服务）的受保护资源，而无需再次进行登录认证。</p>
+<h2 id="单点登录方案"><a href="#单点登录方案" class="headerlink" title="单点登录方案"></a>单点登录方案</h2><p>单点登录常见的几种方案：</p>
+<ol>
+<li>同域名</li>
+<li>共享Session</li>
+<li>CAS</li>
+<li>oauth2</li>
+<li>SAML</li>
+<li>……</li>
+</ol>
+<h3 id="同域名"><a href="#同域名" class="headerlink" title="同域名"></a>同域名</h3><p>前面说的，Session存在于服务端，并将对应的”JSESSIONID”存于用户的Cookie。这就带来了两个问题：</p>
+<ol>
+<li>不同域名，Cookie会失效</li>
+<li>一台应用登录后，另一台并没有对应的Session</li>
+</ol>
+<p>第一个问题好办啊，把所有应用都放在同一个域名下不就可以了么，要知道，Cookie是可以在子域名下共享的，譬如，aaa.com下的Cookie可以在app1.aaa.com何app2.aaa.com下共存，这样，如果多个域名都指向同一台服务器，也没有问题二，那么多域名单点登录问题就解决了。</p>
+<p><img src="https://i.loli.net/2021/10/22/ep5rTWFE3iD6gQo.png" alt="image-20211022143454444"></p>
+<p>可是，一般后端应用都不止一台，域名与应用也至少是1:1的关系，这样，问题二的存在还是不能实现单点登录。接下来看第二个方案，使用token的方式。</p>
+<p>我们判断用户认证信息不再直接通过Session对象，在Main模块，也就是认证模块，会生成一个Token放到Cookie中，其他子应用则负责解析这个Token，如果是用的Spring Security，一般这个工作会交给<code>RememberMeAuthenticationFilter</code>去做，它会根据配置的token key自动解析出对应token值，并生成对应用户的局部Session。</p>
+<p>这里的token可以采用JWT，携带一部分用户信息，减轻服务器查询用户信息的压力，可以使用JWS保证JWT的安全性。</p>
+<p><img src="https://i.loli.net/2021/10/25/PMk2BLFYNjonsTw.png" alt="image-20211025160630024"></p>
+<h4 id="单点登出"><a href="#单点登出" class="headerlink" title="单点登出"></a>单点登出</h4><p>由于用户登录信息存储在Cookie，所以直接Set-Cookie对应字段为空即可。</p>
+<h3 id="共享Session"><a href="#共享Session" class="headerlink" title="共享Session"></a>共享Session</h3><p>应用不止一台，那么在某一台登录，生成的Session也同步到其他的应用，可行么？当然可以，Session一般是存在内存当中的，只要把它从内存迁移出来，放到一个统一的地方，所有应用都从这一处来获取Session，与Cookie带过来的JSESSIONID信息对比不久可以了么。</p>
+<p>Spring已经造好了轮子，Spring-Session就是一个共享Session的组件，可以把Session存到Redis中去，就可以实现一处生成Session多处使用了。</p>
+<p>这样，前面提到的两个问题就都解决了。</p>
+<p><img src="https://i.loli.net/2021/10/22/4Nk3YwLAO2hqxE9.png" alt="image-20211022164616538"></p>
+<p>但是，如果是不同域名下的应用呢，二级域名也不一样，比如app1.aaa.com和app2.bbb.com，如何实现单点登录？目前来说有下面几种方案。有很多种协议，比如Token，CAS，OpenID，OAuth2，SAML等等。</p>
+<h4 id="单点登出-1"><a href="#单点登出-1" class="headerlink" title="单点登出"></a>单点登出</h4><p>清楚用户对应的Session对象即可。</p>
+<h3 id="CAS"><a href="#CAS" class="headerlink" title="CAS"></a>CAS</h3><p>CAS是一套企业范围的单点登录方案，即单点登录应用与受信任应用都是属于一个企业的，登录范围也是在该企业下的所有应用。</p>
+<h4 id="相关概念"><a href="#相关概念" class="headerlink" title="相关概念"></a>相关概念</h4><p>CAS协议下，存在几个概念先明确一下。</p>
+<h5 id="User"><a href="#User" class="headerlink" title="User"></a>User</h5><p>这个好理解，就是受保护资源的所有者。</p>
+<h5 id="CAS-Server"><a href="#CAS-Server" class="headerlink" title="CAS Server"></a>CAS Server</h5><p>负责验证用户并授予用户访问应用程序的权限。一般只存在一个CAS服务器。</p>
+<h5 id="CAS-Client"><a href="#CAS-Client" class="headerlink" title="CAS Client"></a>CAS Client</h5><p>一般会存在多个CAS客户端。其负责保护所在的CAS应用，并从CAS服务器检索授权用户的身份信息。</p>
+<h5 id="TGC-Ticket-granting-cookie"><a href="#TGC-Ticket-granting-cookie" class="headerlink" title="TGC(Ticket-granting cookie)"></a>TGC(Ticket-granting cookie)</h5><p>存在于用户与CAS服务器之间的Cookie，用于存放用户认证凭证。</p>
+<h5 id="TGT-Ticket-Granting-Ticket"><a href="#TGT-Ticket-Granting-Ticket" class="headerlink" title="TGT(Ticket Granting Ticket)"></a>TGT(Ticket Granting Ticket)</h5><p>一个Cookie值，存于TGC中，用于维持用户与CAS服务器之间的会话，一般叫这个会话为<strong>SSO session</strong>。</p>
+<p><strong>ST(Service Ticket)</strong></p>
+<p>用户可以访问某个受保护服务的凭据（直译过来的话是<em><strong>服务票据</strong></em>）。这个ST是生成TGT之后，由CAS Server颁发的。</p>
+<h4 id="关键逻辑"><a href="#关键逻辑" class="headerlink" title="关键逻辑"></a>关键逻辑</h4><p>首先只维持用户与CAS Server之间的登录状态(SSO Session)。</p>
+<p>然后，由于子应用都信任于CAS Server，所以CAS Server颁发一个TGT和一个ST给用户，TGT给用户用来维持其与CAS之间的登录状态。</p>
+<p>用户拿到了ST，使用ST去访问子应用(app1,app2)，子应用去与关联的CAS Server核验该ST是否有效，如果有效，从CAS Server获取用户身份信息，并于用户生成局部Session，设置自己域名的JSESSIONID。</p>
+<p>用户Cookie使用子应用的JSESSION访问子应用受保护资源。</p>
+<p>整个流程时序图如下：</p>
+<p><img src="https://i.loli.net/2021/10/25/1utsRxE3fLDnaCI.png" alt="https://apereo.github.io/cas/4.2.x/images/cas_flow_diagram.png"></p>
+<p>流程图获取有些复杂，需要耐心地一步步过一遍，有个印象。其实实现起来并非那么麻烦，有现成的CAS框架，比如Yale大学发起的一个单点登录项目，全名为<strong>Central Authentication Service</strong>，也简称CAS。其中提供了多种单点登录协议的实现，CAS协议就是其中一种。具体可见<a target="_blank" rel="noopener" href="https://www.apereo.org/projects/cas%E3%80%82">https://www.apereo.org/projects/cas。</a></p>
+<p>或者，我们可以借鉴一下CAS的逻辑，实现一套自己的CAS登录逻辑。关键点，就是流程图中提到的几个EndPoint：</p>
+<ol>
+<li><p><code>GET &#123;casServer&#125;/cas/login?service=app1</code></p>
+<p>从受保护app1重定向到CAS服务器的登录界面。注意，service内容是URL encoded的。</p>
+</li>
+<li><p><code>POST &#123;casServer&#125;/cas/login</code></p>
+<p>用于CAS服务器作为SSO登录的post接口。</p>
+</li>
+<li><p><code>GET &#123;casClient&#125;?ticket=ST-123456</code></p>
+<p>可以在CAS客户端定义一个Filter，去捕捉当前URI是否存在ST，如果存在，则到CAS Server去验证它。</p>
+</li>
+<li><p><code>GET &#123;casServer&#125;/serviceValidate?service=app1&amp;ticket=ST-123456</code></p>
+<p>CAS服务器通过这个endPoint来验证ST是否有效，有效则通过XML-Document方式返回用户信息给CAS客户端。</p>
+</li>
+</ol>
+<p>这个ST是可以存储在LocalStorage中的，可以绕过跨域问题。</p>
+<p>这三个实现的差不多的话，基本的CAS逻辑也就完成了。</p>
+<h4 id="单点登出-2"><a href="#单点登出-2" class="headerlink" title="单点登出"></a>单点登出</h4><p>CAS单点登出相较于之前的略微麻烦些，由于用户在每个CAS Client所处应用上都有局部Session以及对应Cookie，所以需要CAS Server调用所有CAS Client提供的登出API，实现全部登出。</p>
+<h3 id="OAuth2"><a href="#OAuth2" class="headerlink" title="OAuth2"></a>OAuth2</h3><p>关于OAuth2协议，详细的介绍可以参考<a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/html/rfc6749">https://datatracker.ietf.org/doc/html/rfc6749</a></p>
+<h4 id="相关概念-1"><a href="#相关概念-1" class="headerlink" title="相关概念"></a>相关概念</h4><p>OAuth2下下有以下几个角色：</p>
+<h5 id="resource-owner-资源所有者"><a href="#resource-owner-资源所有者" class="headerlink" title="resource owner(资源所有者)"></a>resource owner(资源所有者)</h5><p>官方定义为<strong>能够授予对受保护资源的访问权限的实体</strong>，这个实体不一定是指代人，或许他也是台后端服务器。如果resource owner指代的是人的话，又有个别名，叫做<strong>end-user</strong>。</p>
+<h5 id="resource-server-资源服务器"><a href="#resource-server-资源服务器" class="headerlink" title="resource server(资源服务器)"></a>resource server(资源服务器)</h5><p>受保护资源所在的服务器端，它能够接收用户传过来的access_token，返回受保护资源。</p>
+<h5 id="client-客户端"><a href="#client-客户端" class="headerlink" title="client(客户端)"></a>client(客户端)</h5><p>client是经过了resource owner授权的，用来访问resource server的应用。其持有的是用户的授权信息。</p>
+<h5 id="authorization-server-授权服务器"><a href="#authorization-server-授权服务器" class="headerlink" title="authorization server(授权服务器)"></a>authorization server(授权服务器)</h5><p>验证用户凭证成功并且接收用户授权后，authorization server将向client发放access_token。</p>
+<h4 id="关键逻辑-1"><a href="#关键逻辑-1" class="headerlink" title="关键逻辑"></a>关键逻辑</h4><p>OAuth2本身其实不是用来做单点登录的，而是用于将用户权限授予客户端。用它也可以实现单点登录，将多个子应用均作为受信任的resource server，只要用户拥有了access_token，就可以访问所有子应用资源。</p>
+<p><img src="https://i.loli.net/2021/10/25/pe7z5BGtn39jJ6o.png" alt="image-20211025151012509"></p>
+<p>OAuth2有几种模式，包括<strong>授权码模式（Authorization Code Grant）</strong>，<strong>隐式授权模式（Implicit Grant）</strong>，<strong>资源所有者密码模式（Resource Owner Password Credentials Grant）</strong>，以及<strong>客户端凭证模式（Client Credentials Grant）</strong>。这里简单讲下授权码模式，也是最复杂、使用度最高的一种模式。大致流程如下：</p>
+<p><img src="https://i.loli.net/2021/10/25/T2Juc9YKoLaI5fP.png" alt="image-20211025151215270"></p>
+<p>简单来说：</p>
+<ol>
+<li><p>client不属于我，不能直接访问我受Authorization Server保护的资源。</p>
+</li>
+<li><p>于是，client把它的身份信息（e.g. client-id,client-secret etc.）在authorization server进行了注册。</p>
+</li>
+<li><p>并且在我第一次使用此client时，client会向authorization server发送认证请求。</p>
+</li>
+<li><p>authorization server一般会通过重定向的方式，把我的浏览器重定向到它的登录页。我在这个登录页提交我的身份凭据（用户名、密码）。</p>
+</li>
+<li><p>authorization server通过了认证，把我的页面重定向到授权页，我可以选择授予client哪些权限（头像、联系方式等）。</p>
+</li>
+<li><p>我向authorization server提交了授权请求，授权服务器给我一个授权码，并重定向到client的认证url。</p>
+</li>
+<li><p>client获取到了授权码，向Authorization Server索要access_token。</p>
+</li>
+<li><p>client获得并存储access_token，使用它来访问resource server。</p>
+</li>
+</ol>
+<p>整个过程就是resource owner把受保护权限赋予client的过程。</p>
+<p>获得了access_token，也就可以用来访问所有的子应用了。这里token并非存储在Cookie，而是一般存储在浏览器Local Storage中，所以并无跨域问题。</p>
+<p>resource server一般会读取authorization server库中存储的token，看是否过期来验证token，亦或者是token使用JWS，自带过期时间，且共要加密与签名的存在保证了JWS不可伪造，可以直接判断token是否有效。</p>
+<p>以下时序图引用自<a target="_blank" rel="noopener" href="https://lotabout.me/2020/OAuth-2-workflow/">理解 OAuth 2.0 认证流程</a></p>
+<p><img src="https://i.loli.net/2021/10/25/yEdHz1soRTPNFJL.png" alt="image-20211025202327358"></p>
+<h4 id="单点登出-3"><a href="#单点登出-3" class="headerlink" title="单点登出"></a>单点登出</h4><p>相较于CAS，OAuth2的单点登出更为麻烦，因为client一般都是第三方的，client会注册到authorization server，但authorization server并无法去调用client。如果access_token被持久化了倒还好，将用户对应持久层的token置为失效即可，下次验证token即不通过。但如果并没有持久化，比如使用的是JWS，就只能由客户端自己去清除当前client的access_token，也无法访问到其他所有client。所以比较棘手，只能等对应的access_token自己失效。</p>
+<h4 id="与CAS对比"><a href="#与CAS对比" class="headerlink" title="与CAS对比"></a>与CAS对比</h4><p>CAS下，受保护资源是属于客户端的。用户访问客户端，客户端通过CAS服务器来验证该用户是否有权访问自己的资源。而在OAuth2下，受保护资源是属于服务端的。用户需要让客户端知道，这个客户端是否有权访问用户位于服务端的数据。</p>
+<p>这是CAS的大致流程，CAS Client用于保护所在服务器的资源，一般也是位于服务端。</p>
+<p><img src="https://i.loli.net/2021/10/25/f3Tr9GHPvolBwkh.png" alt="image-20211025160151996"></p>
+<p>而OAuth2下，Client是独立的，它可以在手机上，浏览器上，PC软件上（经常用到的，用网易账号登录有道云笔记pc端，这里有道云笔记软件就是client，访问的网易云authorization server，获取我在网易云的头像等信息），又或者是另一个独立的后端服务器上，纯纯的客户端。</p>
+<p><img src="https://miro.medium.com/max/1050/1*ULF38OTiNJNQZ4lHQZqRwQ.png" alt="img"></p>
+<p>遗憾的是，OAuth2是一个授权协议，client最终拿到的，是用户的权限范围，而非用户本身的详细信息。如果client就需要用户详细信息了，该怎么办？</p>
+<p>于是，在OAuth2的基础上，又出现了另一个协议：OIDC。</p>
+<h3 id="OIDC-OpenID-Connection"><a href="#OIDC-OpenID-Connection" class="headerlink" title="OIDC(OpenID Connection)"></a>OIDC(OpenID Connection)</h3><p>看起来好像很高大上，其实就是在OAuth2的基础上再封装了一层，可以理解为加强版OAuth2，使OAuth2具备了认证能力。其中新增了几个概念：</p>
+<h4 id="相关概念-2"><a href="#相关概念-2" class="headerlink" title="相关概念"></a>相关概念</h4><h5 id="OpenID-Provider"><a href="#OpenID-Provider" class="headerlink" title="OpenID Provider"></a>OpenID Provider</h5><p>负责签发ID token。也就是authorization server。</p>
+<h5 id="ID-token"><a href="#ID-token" class="headerlink" title="ID token"></a>ID token</h5><p>一个JWT格式的字符串，存储了用户的一些基本信息.</p>
+<h5 id="end-user"><a href="#end-user" class="headerlink" title="end-user"></a>end-user</h5><p>不同于OAuth2的resource owner，这里具体到了，资源所有者就是人。</p>
+<h5 id="userinfo-endpoint"><a href="#userinfo-endpoint" class="headerlink" title="userinfo endpoint"></a>userinfo endpoint</h5><p>用户信息端点，位于authorization server，用于返回用户更加详细的认证信息。</p>
+<h5 id="scope标准化"><a href="#scope标准化" class="headerlink" title="scope标准化"></a>scope标准化</h5><p>scope中必须带有openid。</p>
+<h5 id="Claim"><a href="#Claim" class="headerlink" title="Claim"></a>Claim</h5><p>终端用户信息字段。</p>
+<h4 id="单点登出-4"><a href="#单点登出-4" class="headerlink" title="单点登出"></a>单点登出</h4><p>同OAuth2的问题，token未持久化，且分布在用户代理，难以在authorization server统一清除，需要一些额外的开发量来实现。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>大概列举了几种实现SSO的方式，各有千秋，还是要具体情况具体分析，适合业务场景的才是最好的方案。</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>同域名</td>
+<td>开发成本低，理解难度小，维护成本低。</td>
+<td>分布式场景支持性较差，很多应用非同域名。<br/>存放于Cookie，安全性低。<br/>用户如果关闭Cookie则直接无法使用。</td>
+</tr>
+<tr>
+<td>共享Session</td>
+<td>降低服务器内存开销。分布式支持性较好。</td>
+<td>维护成本较高，需要管理缓存集群。</td>
+</tr>
+<tr>
+<td>CAS</td>
+<td>分布式架构下支持性很好，适合企业内部应用间互相认证。</td>
+<td>架构较为复杂，开发成本较高。</td>
+</tr>
+<tr>
+<td>OAuth2&#x2F;OIDC</td>
+<td>分布式架构下支持性很好，基于JWS可减轻服务器压力。<br/>适用于需要将企业内部应用资源开发给第三方时使用。</td>
+<td>架构较为复杂，开发成本高，单点退出比较难搞。</td>
+</tr>
+</tbody></table>
+<p>还有其他的SSO Protocol，例如SAML，还没研究过，所以暂时不总结了。。。以上内容大多是最近学习的内容，包含了不少自己的理解，所以可能会有些错误，实际开发时还需要多翻阅官方手册。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/sso/" rel="tag"># sso</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2021/09/14/Windows%E4%B8%8BMySQL%E9%87%8D%E7%BD%AERoot%E5%AF%86%E7%A0%81/" rel="prev" title="Windows下MySQL重置Root密码">
+                  <i class="fa fa-chevron-left"></i> Windows下MySQL重置Root密码
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2021/10/30/binding%E6%A8%A1%E5%9D%97%E4%B8%8E%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F/" rel="next" title="MyBatis-binding模块与代理模式">
+                  MyBatis-binding模块与代理模式 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">你丶一顾倾城</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"skywaterliu/skywaterliu.github.io","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>

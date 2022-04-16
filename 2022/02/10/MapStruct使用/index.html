@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"skywaterliu.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.11.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"utterances","storage":true,"lazyload":true,"nav":{"utterances":{"order":-1}},"activeClass":"utterances"},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="MapStruct [TOC]  什么是MapStruct 业务系统开发过程中，常常有分层概念，如持久层，业务层，数据传输层，视图层。  每个分层各自有自己的bean命名规则，对应上面提到的，如DO，BO，DTO，VO等。虽然命名不同，但绝大部分情况下，bean的内容都大同小异。所以，相同业务对象Bean在不同层交换数据时常常会涉及到类型的映射转换。MapStruct就是其中一种。  与其他Bea">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MapStruct使用">
+<meta property="og:url" content="https://skywaterliu.github.io/2022/02/10/MapStruct%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="安之一隅">
+<meta property="og:description" content="MapStruct [TOC]  什么是MapStruct 业务系统开发过程中，常常有分层概念，如持久层，业务层，数据传输层，视图层。  每个分层各自有自己的bean命名规则，对应上面提到的，如DO，BO，DTO，VO等。虽然命名不同，但绝大部分情况下，bean的内容都大同小异。所以，相同业务对象Bean在不同层交换数据时常常会涉及到类型的映射转换。MapStruct就是其中一种。  与其他Bea">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-02-10T12:08:00.000Z">
+<meta property="article:modified_time" content="2022-04-16T09:47:16.348Z">
+<meta property="article:author" content="你丶一顾倾城">
+<meta property="article:tag" content="java">
+<meta property="article:tag" content="MapStruct">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://skywaterliu.github.io/2022/02/10/MapStruct%E4%BD%BF%E7%94%A8/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://skywaterliu.github.io/2022/02/10/MapStruct%E4%BD%BF%E7%94%A8/","path":"2022/02/10/MapStruct使用/","title":"MapStruct使用"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>MapStruct使用 | 安之一隅</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">安之一隅</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">莫听穿林打叶声，何妨吟啸且徐行。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#MapStruct"><span class="nav-number">1.</span> <span class="nav-text">MapStruct</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFMapStruct"><span class="nav-number">1.1.</span> <span class="nav-text">什么是MapStruct</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%8E%E5%85%B6%E4%BB%96Bean%E6%98%A0%E5%B0%84%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94"><span class="nav-number">1.2.</span> <span class="nav-text">与其他Bean映射工具对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.</span> <span class="nav-text">使用方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E4%BE%9D%E8%B5%96"><span class="nav-number">1.3.1.</span> <span class="nav-text">配置依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#maven%E6%96%B9%E5%BC%8F"><span class="nav-number">1.3.1.1.</span> <span class="nav-text">maven方式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="nav-number">1.3.1.1.1.</span> <span class="nav-text">基本配置</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9B%86%E6%88%90Spring"><span class="nav-number">1.3.1.1.2.</span> <span class="nav-text">集成Spring</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%9B%86%E6%88%90lombok"><span class="nav-number">1.3.1.1.3.</span> <span class="nav-text">集成lombok</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%A0%E5%B0%84%E5%99%A8-Mapper"><span class="nav-number">1.3.2.</span> <span class="nav-text">映射器 Mapper</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E6%98%A0%E5%B0%84%E5%99%A8"><span class="nav-number">1.3.2.1.</span> <span class="nav-text">定义映射器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E6%98%A0%E5%B0%84%E5%99%A8"><span class="nav-number">1.3.2.2.</span> <span class="nav-text">获取映射器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E5%AD%97%E6%AE%B5%E6%98%A0%E5%B0%84%E8%A7%84%E5%88%99"><span class="nav-number">1.3.2.3.</span> <span class="nav-text">定义字段映射规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89Bean%E6%98%A0%E5%B0%84%E8%A7%84%E5%88%99"><span class="nav-number">1.3.2.4.</span> <span class="nav-text">自定义Bean映射规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B6%88%E9%99%A4%E6%AD%A7%E4%B9%89"><span class="nav-number">1.3.2.5.</span> <span class="nav-text">消除歧义</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E5%80%BC%E7%B1%BB%E5%9E%8B%E7%9B%B8%E5%90%8C"><span class="nav-number">1.3.2.5.1.</span> <span class="nav-text">返回值类型相同</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%BF%94%E5%9B%9E%E5%80%BC%E7%B1%BB%E5%9E%8B%E5%AD%98%E5%9C%A8%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB"><span class="nav-number">1.3.2.5.2.</span> <span class="nav-text">返回值类型存在继承关系</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%86%E5%A4%9A%E4%B8%AA%E4%B8%8D%E5%90%8C%E7%B1%BB%E5%9E%8BBean%E5%90%88%E5%B9%B6%E4%B8%BA%E4%B8%80%E4%B8%AA%E5%85%B6%E4%BB%96%E7%B1%BB%E5%9E%8B%E7%9A%84Bean"><span class="nav-number">1.3.2.6.</span> <span class="nav-text">将多个不同类型Bean合并为一个其他类型的Bean</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%9A%E8%BF%87%E4%B8%80%E4%B8%AABean%E6%9B%B4%E6%96%B0%E5%8F%A6%E4%B8%80%E4%B8%AABean%E7%9A%84%E5%86%85%E5%AE%B9"><span class="nav-number">1.3.2.7.</span> <span class="nav-text">通过一个Bean更新另一个Bean的内容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E5%85%B6%E4%BB%96%E6%98%A0%E5%B0%84%E5%99%A8"><span class="nav-number">1.3.2.8.</span> <span class="nav-text">调用其他映射器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%A0%E5%B0%84Map%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.3.2.9.</span> <span class="nav-text">映射Map类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%98%A0%E5%B0%84%E6%9E%9A%E4%B8%BE%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.3.2.10.</span> <span class="nav-text">映射枚举类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E9%85%8D%E7%BD%AE%E9%A1%B9"><span class="nav-number">1.3.2.11.</span> <span class="nav-text">高级配置项</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%BB%98%E8%AE%A4%E5%80%BC"><span class="nav-number">1.3.2.11.1.</span> <span class="nav-text">默认值</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A1%A8%E8%BE%BE%E5%BC%8F"><span class="nav-number">1.3.2.11.2.</span> <span class="nav-text">表达式</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E"><span class="nav-number">1.4.</span> <span class="nav-text">写在最后</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">你丶一顾倾城</p>
+  <div class="site-description" itemprop="description">嗨害嗨！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/skywaterliu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;skywaterliu" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:liutianshui17@gmail.com" title="E-Mail → mailto:liutianshui17@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://skywaterliu.github.io/2022/02/10/MapStruct%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="你丶一顾倾城">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="安之一隅">
+      <meta itemprop="description" content="嗨害嗨！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="MapStruct使用 | 安之一隅">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MapStruct使用
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-02-10 20:08:00" itemprop="dateCreated datePublished" datetime="2022-02-10T20:08:00+08:00">2022-02-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2022-04-16 17:47:16" itemprop="dateModified" datetime="2022-04-16T17:47:16+08:00">2022-04-16</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%90%8E%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">后端</span></a>
+        </span>
+          ，
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%90%8E%E7%AB%AF/java/" itemprop="url" rel="index"><span itemprop="name">java</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="MapStruct"><a href="#MapStruct" class="headerlink" title="MapStruct"></a>MapStruct</h1><p>[TOC]</p>
+<h2 id="什么是MapStruct"><a href="#什么是MapStruct" class="headerlink" title="什么是MapStruct"></a>什么是MapStruct</h2><p>业务系统开发过程中，常常有分层概念，如持久层，业务层，数据传输层，视图层。</p>
+<p>每个分层各自有自己的bean命名规则，对应上面提到的，如DO，BO，DTO，VO等。虽然命名不同，但绝大部分情况下，bean的内容都大同小异。所以，相同业务对象Bean在不同层交换数据时常常会涉及到类型的映射转换。MapStruct就是其中一种。</p>
+<h2 id="与其他Bean映射工具对比"><a href="#与其他Bean映射工具对比" class="headerlink" title="与其他Bean映射工具对比"></a>与其他Bean映射工具对比</h2><p>市面上有很多映射工具类，比较流行的有Spring BeanUtils，Cglib BeanCopier，Apache BeanUtils，Dozer，orika，以及这次讲的MapStruct。</p>
+<p>对上面提到的框架进行归类：</p>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>深拷贝&#x2F;浅拷贝</th>
+<th>实现方式</th>
+<th>执行阶段</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Spring BeanUtils</td>
+<td>浅拷贝</td>
+<td>Java反射</td>
+<td>运行期</td>
+</tr>
+<tr>
+<td>Cglib BeanCopier</td>
+<td>浅拷贝</td>
+<td>修改字节码生成代理类，代理类实现get、set</td>
+<td>运行期</td>
+</tr>
+<tr>
+<td>Apache BeanUtils</td>
+<td>浅拷贝</td>
+<td>Java反射</td>
+<td>运行期</td>
+</tr>
+<tr>
+<td>Dozer</td>
+<td>深拷贝</td>
+<td>Java反射</td>
+<td>运行期</td>
+</tr>
+<tr>
+<td>orika</td>
+<td>深拷贝</td>
+<td>javassist生成字节码</td>
+<td>编译期</td>
+</tr>
+<tr>
+<td>MapStruct</td>
+<td>深拷贝</td>
+<td>Annotation Processor生成源码</td>
+<td>编译期</td>
+</tr>
+</tbody></table>
+<p>性能对比：</p>
+<p>就通常使用上来说，性能由高到底为：MapStruct &gt; orika &gt; Cglib BeanCopier &gt; Spring BeanUtils &gt; Apache BeanUtils &gt; Dozer </p>
+<p>MapStruct优势在于功能丰富，编译期生成Java源码进行映射，性能高。</p>
+<p>具体对比结果网上有很多，不细说。</p>
+<h2 id="使用方式"><a href="#使用方式" class="headerlink" title="使用方式"></a>使用方式</h2><h3 id="配置依赖"><a href="#配置依赖" class="headerlink" title="配置依赖"></a>配置依赖</h3><h4 id="maven方式"><a href="#maven方式" class="headerlink" title="maven方式"></a>maven方式</h4><h5 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h5><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">org.mapstruct.version</span>&gt;</span>1.4.2.Final<span class="tag">&lt;/<span class="name">org.mapstruct.version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line">...</span><br><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.mapstruct<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mapstruct<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;org.mapstruct.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line">...</span><br><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.8.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">                <span class="comment">&lt;!-- MapStruct依靠Annotation Processor生成代码 --&gt;</span></span><br><span class="line">                <span class="comment">&lt;!-- maven import方式无法统一管理plugin版本，仍需手动定义，--&gt;</span></span><br><span class="line">                <span class="comment">&lt;!-- mapstruct-processor版本一般与mapstruct版本保持一致 --&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">annotationProcessorPaths</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">path</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.mapstruct<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mapstruct-processor<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;org.mapstruct.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">path</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">annotationProcessorPaths</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h5 id="集成Spring"><a href="#集成Spring" class="headerlink" title="集成Spring"></a>集成Spring</h5><p>如果是Spring项目，建议配置一下，可以将MapStruct生成的Mapper类直接依赖注入到其他Bean。</p>
+<p>主要在编译插件配置中加上一些配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.8.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">annotationProcessorPaths</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">path</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.mapstruct<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mapstruct-processor<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;mapstruct-processor.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">path</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">annotationProcessorPaths</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">compilerArgs</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">arg</span>&gt;</span></span><br><span class="line">                -Amapstruct.suppressGeneratorTimestamp=true</span><br><span class="line">            <span class="tag">&lt;/<span class="name">arg</span>&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- spring项目可以在这里全局配置mapper的defaultComponentModel为spring --&gt;</span></span><br><span class="line">            <span class="comment">&lt;!-- mapper会成为受spring管理的bean，被依赖注入至其他bean --&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">arg</span>&gt;</span></span><br><span class="line">                -Amapstruct.defaultComponentModel=spring</span><br><span class="line">            <span class="tag">&lt;/<span class="name">arg</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">compilerArgs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="集成lombok"><a href="#集成lombok" class="headerlink" title="集成lombok"></a>集成lombok</h5><p>一般业务项目中，Lombok也是常用的一款工具，需要注意的是，Lombok也依赖于Annotation Processor，所以也需要配置Lombok的Annotation Processor Paths，编译时才能进行代码生成。</p>
+<p><strong>注意：</strong>Lombok 在1.18.16版本中引入了一项重大改动<a target="_blank" rel="noopener" href="https://projectlombok.org/changelog">changelog</a>，必须要再额外添加一个Annotation Processor：<code>lombok-mapstruct-binding</code>。见如下配置：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">org.mapstruct.version</span>&gt;</span>1.4.2.Final<span class="tag">&lt;/<span class="name">org.mapstruct.version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">org.projectlombok.version</span>&gt;</span>1.18.16<span class="tag">&lt;/<span class="name">org.projectlombok.version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">maven.compiler.source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">maven.compiler.source</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">maven.compiler.target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">maven.compiler.target</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.mapstruct<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mapstruct<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;org.mapstruct.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.projectlombok<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>lombok<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;org.projectlombok.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.8.1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">annotationProcessorPaths</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">path</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.mapstruct<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>mapstruct-processor<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;org.mapstruct.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">path</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">path</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.projectlombok<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>lombok<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;org.projectlombok.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">path</span>&gt;</span></span><br><span class="line"></span><br><span class="line">                    <span class="comment">&lt;!-- 如果Lombok是1.18.16以上版本，这个注解处理器一定要加 --&gt;</span></span><br><span class="line">                    <span class="tag">&lt;<span class="name">path</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.projectlombok<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>lombok-mapstruct-binding<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">                        <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.1.0<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">                    <span class="tag">&lt;/<span class="name">path</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">annotationProcessorPaths</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="映射器-Mapper"><a href="#映射器-Mapper" class="headerlink" title="映射器 Mapper"></a>映射器 Mapper</h3><h4 id="定义映射器"><a href="#定义映射器" class="headerlink" title="定义映射器"></a>定义映射器</h4><p>MapStruct使用<code>@Mapper</code>来定义转换类。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">VenueTransformer</span> &#123;</span><br><span class="line">    VenueDTO <span class="title function_">toVenueDTO</span><span class="params">(VenueDO venueDO)</span>;</span><br><span class="line">    List&lt;VenueDTO&gt; <span class="title function_">toVenueDTOList</span><span class="params">(List&lt;VenueDO&gt; venueDOList)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>定义这样一个接口（也可以是抽象类），在编译时，MapStruct将根据参数与返回类型，为其中字段自动生成转换代码。</p>
+<p>以下是自动生成的代码，会在target&#x2F;generate-sources目录下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="meta">@Generated(</span></span><br><span class="line"><span class="meta">    value = &quot;org.mapstruct.ap.MappingProcessor&quot;,</span></span><br><span class="line"><span class="meta">    comments = &quot;version: 1.4.2.Final, compiler: javac, environment: Java 1.8.0_131 (Oracle Corporation)&quot;</span></span><br><span class="line"><span class="meta">)</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">VenueTransformerImpl</span> <span class="keyword">implements</span> <span class="title class_">VenueTransformer</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> VenueDTO <span class="title function_">toVenueDTO</span><span class="params">(VenueDO venueDO)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> ( venueDO == <span class="literal">null</span> ) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">VenueDTO</span> <span class="variable">venueDTO</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">VenueDTO</span>();</span><br><span class="line">        venueDTO.setAdderName( venueDO.getAdderName() );</span><br><span class="line">        venueDTO.setAdderNo( venueDO.getAdderNo() );</span><br><span class="line">        venueDTO.setAddTime( venueDO.getAddTime() );</span><br><span class="line">        venueDTO.setUpdaterName( venueDO.getUpdaterName() );</span><br><span class="line">        venueDTO.setUpdaterNo( venueDO.getUpdaterNo() );</span><br><span class="line">        venueDTO.setUpdateTime( venueDO.getUpdateTime() );</span><br><span class="line">        venueDTO.setVenueId( venueDO.getVenueId() );</span><br><span class="line">        venueDTO.setVenueName( venueDO.getVenueName() );</span><br><span class="line">        <span class="keyword">return</span> venueDTO;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> List&lt;VenueDTO&gt; <span class="title function_">toVenueDTOList</span><span class="params">(List&lt;VenueDO&gt; venueDOList)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> ( venueDOList == <span class="literal">null</span> ) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        List&lt;VenueDTO&gt; list = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;VenueDTO&gt;( venueDOList.size() );</span><br><span class="line">        <span class="keyword">for</span> ( VenueDO venueDO : venueDOList ) &#123;</span><br><span class="line">            list.add( toVenueDTO( venueDO ) );</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> list;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以发现，源类型与目标类型中的字段名如果一样，MapStruct会自动映射上。单个Bean以及Bean List都会生成，拓展开也可以是Set，又或者是一个具体的实现类，如ArrayList等。</p>
+<h4 id="获取映射器"><a href="#获取映射器" class="headerlink" title="获取映射器"></a>获取映射器</h4><p>如果如前文所述，在maven配置时，配置了<code>defaultComponentModel=spring</code>，那么可以直接像注入其他@Service一样注入这个@Mapper即可。</p>
+<p>如果没有配置，也可以通过<code>Mappers.getMapper( VenueTransformer.class )</code>来获取映射器实例。</p>
+<h4 id="定义字段映射规则"><a href="#定义字段映射规则" class="headerlink" title="定义字段映射规则"></a>定义字段映射规则</h4><p>如果源类型与目标类型中字段名不一样，我们也可以通过<code>@Mapping</code>注解来自定义字段的映射关系。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ExhibitionTransformer</span> &#123;</span><br><span class="line">    <span class="meta">@Mapping(source = &quot;exhibitionName&quot;, target = &quot;exhibitionShowName&quot;)</span></span><br><span class="line">    ExhibitionDTO <span class="title function_">toExhibitionDTO</span><span class="params">(ExhibitionDO exhibitionDO)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>此处会将<code>ExhibitionDO.exhibitionName</code>映射到<code>ExhibitionDTO.exhibitionShowName</code>上。</p>
+<p>MapStruct会自动处理一些类型转换，比如一个Integer类型要映射到String类型上，则会调用String.valueOf(int)，具体见<a target="_blank" rel="noopener" href="https://mapstruct.org/documentation/stable/reference/html/#implicit-type-conversions">隐式类型转换</a>。</p>
+<h4 id="自定义Bean映射规则"><a href="#自定义Bean映射规则" class="headerlink" title="自定义Bean映射规则"></a>自定义Bean映射规则</h4><p>如果映射过程比较复杂，定制性很高，MapStruct也提供了自己写代码的转换方式。只需要在接口里写个default方法即可。</p>
+<h4 id="消除歧义"><a href="#消除歧义" class="headerlink" title="消除歧义"></a>消除歧义</h4><h5 id="返回值类型相同"><a href="#返回值类型相同" class="headerlink" title="返回值类型相同"></a>返回值类型相同</h5><p>如果一个Mapper（包括@Mapper.use()的其他Mapper）中，出现了多个方法，他们的入参类型相同且返回值类型相同，会出现歧义，MapStruct会不知道要用哪一个具体的转换器方法。此时，我们可以通过给方法”起名字”的方式来消除歧义性，给方法加上<code>@Named</code>注解。如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper(imports = &#123;EncryptUtil.class, CompanyLevel.class&#125;)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">CompanyTransformer</span> &#123;</span><br><span class="line">    CompanyDTO <span class="title function_">toCompanyDTO</span><span class="params">(CompanyDO companyDO)</span>;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 需要添加<span class="doctag">@Named</span>，否则会与toCompanyDTO冲突。为什么？</span></span><br><span class="line"><span class="comment">     * 加入另一个Mapper引用了当前mapper，转换时遇到了需要将CompanyDO转换为CompanyDTO,</span></span><br><span class="line"><span class="comment">     * 那么将出现歧义，这时就需要通过<span class="doctag">@Named</span>将其区分，然后调用Mapping时通过qualifiedByName指定具体调用。</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="meta">@Named(&quot;customToCompanyDTO&quot;)</span></span><br><span class="line">    <span class="keyword">default</span> CompanyDTO <span class="title function_">customToCompanyDTO</span><span class="params">(CompanyDO companyDO)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (companyDO == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="type">CompanyDTO</span> <span class="variable">companyDTO</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CompanyDTO</span>();</span><br><span class="line">        companyDTO.setEncodeComId(EncryptUtil.encrypt(companyDO.getComId()));</span><br><span class="line">        companyDTO.setComShowName(<span class="string">&quot;公司名：&quot;</span> + companyDO.getComName());</span><br><span class="line">        companyDTO.setAddress(companyDO.getAddress());</span><br><span class="line">        companyDTO.setCompanyLevel(CompanyLevel.determineByValue(companyDO.getLevel()));</span><br><span class="line">        companyDTO.setStatus(companyDO.getStatus());</span><br><span class="line">        <span class="keyword">return</span> companyDTO;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="返回值类型存在继承关系"><a href="#返回值类型存在继承关系" class="headerlink" title="返回值类型存在继承关系"></a>返回值类型存在继承关系</h5><p>譬如有两个返回类型B，C，都继承于类型A，那么如果在同一个Mapper中定义返回值类型为A，那么会出现歧义，我们实际需要B还是C？</p>
+<p>这时候可以通过<code>@BeanMapping.resultType</code>来加以区分。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper( uses = MyFactory.class )</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">MyMapper</span> &#123;</span><br><span class="line">    <span class="meta">@BeanMapping( resultType = B.class )</span></span><br><span class="line">    A <span class="title function_">map</span><span class="params">( Source source )</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyFactory</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> B <span class="title function_">createB</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">B</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> C <span class="title function_">createC</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">C</span>();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="将多个不同类型Bean合并为一个其他类型的Bean"><a href="#将多个不同类型Bean合并为一个其他类型的Bean" class="headerlink" title="将多个不同类型Bean合并为一个其他类型的Bean"></a>将多个不同类型Bean合并为一个其他类型的Bean</h4><p>@Mapping注解中，source以及target均可以通过”obj.field”的方式指代深层的成员字段。通过这种方式，可以指定多个源类型中的部分字段，来合并成一个新的类型对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CompanyDTO</span> <span class="keyword">extends</span> <span class="title class_">BaseDTO</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String encodeComId;</span><br><span class="line">    <span class="keyword">private</span> String comShowName;</span><br><span class="line">    <span class="keyword">private</span> String address;</span><br><span class="line">    <span class="keyword">private</span> CompanyLevel companyLevel;</span><br><span class="line">    <span class="keyword">private</span> Short status;</span><br><span class="line">    <span class="keyword">private</span> Integer deleteFlag;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Exhibits</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String exhibitsName;</span><br><span class="line">    <span class="keyword">private</span> String producerName;</span><br><span class="line">    <span class="keyword">private</span> CompanyDTO producerDetail;</span><br><span class="line">    <span class="keyword">private</span> String authorName;</span><br><span class="line">    <span class="keyword">private</span> CompanyEmployee authorDetail;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CompanyEmployee</span> <span class="keyword">extends</span> <span class="title class_">EmployeeDO</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String departmentName;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">@Data</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">EmployeeDO</span> <span class="keyword">extends</span> <span class="title class_">BaseDO</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String empNo;</span><br><span class="line">    <span class="keyword">private</span> String empName;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">ExhibitsTransformer</span> &#123;</span><br><span class="line">    <span class="meta">@Mapping(source = &quot;exhibitsName&quot;, target = &quot;exhibitsName&quot;)</span></span><br><span class="line">    <span class="meta">@Mapping(source = &quot;companyDTO.comShowName&quot;, target = &quot;producerName&quot;)</span></span><br><span class="line">    <span class="meta">@Mapping(source = &quot;companyDTO&quot;, target = &quot;producerDetail&quot;)</span></span><br><span class="line">    <span class="meta">@Mapping(source = &quot;companyEmployee.empName&quot;, target = &quot;authorName&quot;)</span></span><br><span class="line">    <span class="meta">@Mapping(source = &quot;companyEmployee&quot;, target = &quot;authorDetail&quot;)</span></span><br><span class="line">    Exhibits <span class="title function_">buildExhibits</span><span class="params">(String exhibitsName, CompanyDTO companyDTO, CompanyEmployee companyEmployee)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="通过一个Bean更新另一个Bean的内容"><a href="#通过一个Bean更新另一个Bean的内容" class="headerlink" title="通过一个Bean更新另一个Bean的内容"></a>通过一个Bean更新另一个Bean的内容</h4><p>这里会用到一个<code>@MappingTarget</code>，指向需要被更新的Bean类型。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapping(source = &quot;companyDTO.comShowName&quot;, target = &quot;producerName&quot;)</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">updateProducerInfo</span><span class="params">(<span class="meta">@MappingTarget</span> Exhibits exhibits, CompanyDTO companyDTO)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这里也可以返回Exhibits类型，可以配合其他映射方法实现链式转换。</p>
+<h4 id="调用其他映射器"><a href="#调用其他映射器" class="headerlink" title="调用其他映射器"></a>调用其他映射器</h4><p>可以通过<code>@Mapper(use=AnotherTransformer.class)</code>来将另一个Mapper引入到当前Mapper来，这样做的好处是，其他Mapper写的类型转换可以实现复用。比如，其他Mapper定义了一个Date到String的类型转换，我这个Mapper中涉及到的Date到String也需要如此转换，那么就可以直接把对应的Mapper引入进来即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DateMapper</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">asString</span><span class="params">(Date date)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> date != <span class="literal">null</span> ? <span class="keyword">new</span> <span class="title class_">SimpleDateFormat</span>( <span class="string">&quot;yyyy-MM-dd&quot;</span> ).format( date ) : <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>引入DateMapper</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper(uses=DateMapper.class)</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">CarMapper</span> &#123;</span><br><span class="line">    CarDto <span class="title function_">carToCarDto</span><span class="params">(Car car)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="映射Map类型"><a href="#映射Map类型" class="headerlink" title="映射Map类型"></a>映射Map类型</h4><p>有时会涉及到Map之间的相互转换，譬如Map&lt;String, String&gt;转换为Map&lt;Long, Date&gt;，可以使用<code>@MapMapping</code>注解：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@MapMapping(valueDateFormat = &quot;yyyy-MM-dd&quot;)</span></span><br><span class="line">Map&lt;Long, Date&gt; <span class="title function_">stringStringMapToLongDateMap</span><span class="params">(Map&lt;String, String&gt; sourceMap)</span>;</span><br></pre></td></tr></table></figure>
+
+<h4 id="映射枚举类型"><a href="#映射枚举类型" class="headerlink" title="映射枚举类型"></a>映射枚举类型</h4><p>可以使用MapStruct将一种枚举类型映射为另一种枚举类型。默认情况是根据枚举常量名进行映射，如果需要自定义，可以使用下面的方式：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">OrderMapper</span> &#123;</span><br><span class="line">    <span class="meta">@ValueMappings(&#123;</span></span><br><span class="line"><span class="meta">        @ValueMapping(source = &quot;EXTRA&quot;, target = &quot;SPECIAL&quot;),</span></span><br><span class="line"><span class="meta">        @ValueMapping(source = &quot;STANDARD&quot;, target = &quot;DEFAULT&quot;),</span></span><br><span class="line"><span class="meta">        @ValueMapping(source = &quot;NORMAL&quot;, target = &quot;DEFAULT&quot;)</span></span><br><span class="line"><span class="meta">    &#125;)</span></span><br><span class="line">    ExternalOrderType <span class="title function_">orderTypeToExternalOrderType</span><span class="params">(OrderType orderType)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>如上会将<code>OrderType.EXTRA</code>映射到<code>ExternalOrderType.SPECIAL</code>。</p>
+<h4 id="高级配置项"><a href="#高级配置项" class="headerlink" title="高级配置项"></a>高级配置项</h4><h5 id="默认值"><a href="#默认值" class="headerlink" title="默认值"></a>默认值</h5><p>使用<code>@Mapping</code>注解中的<code>defaultValue</code>参数，可以配置映射项的默认值，如果源值为null，那么就会取这个defaultValue的值作为目标值。</p>
+<p>如果目标字段是一个新的字段，只需要给上默认常量呢？可以使用<code>constant</code>参数即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapping(target = &quot;longProperty&quot;, source = &quot;longProp&quot;, defaultValue = &quot;-1&quot;)</span></span><br><span class="line"><span class="meta">@Mapping(target = &quot;dateConstant&quot;, dateFormat = &quot;dd-MM-yyyy&quot;, constant = &quot;09-01-2014&quot;)</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="表达式"><a href="#表达式" class="headerlink" title="表达式"></a>表达式</h5><p>常见的如日期格式化，MapStruct提供了<code>Mapping.dateFormat</code>，也可以自定义其他的format方式。</p>
+<p>一种方式是单独写一个工具类，添加方法并引入当前Mapper中（见“调用其他映射器”章节DateMapper使用），我们也可以直接在<code>@Mapping</code>中定义特定的表达式，譬如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Mapper</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">SourceTargetMapper</span> &#123;</span><br><span class="line">    <span class="meta">@Mapping(target = &quot;timeAndFormat&quot;,</span></span><br><span class="line"><span class="meta">         expression = &quot;java(new org.sample.TimeAndFormat(s.getTime(), s.getFormat()))&quot;)</span></span><br><span class="line">    Target <span class="title function_">sourceToTarget</span><span class="params">(Source s)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配合<code>@imports</code>注解，在使用表达式时，可以不使用全限定名称。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">imports org.sample.TimeAndFormat;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Mapper( imports = TimeAndFormat.class )</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">SourceTargetMapper</span> &#123;</span><br><span class="line">    <span class="meta">@Mapping(target = &quot;timeAndFormat&quot;,</span></span><br><span class="line"><span class="meta">         expression = &quot;java( new TimeAndFormat( s.getTime(), s.getFormat() ) )&quot;)</span></span><br><span class="line">    Target <span class="title function_">sourceToTarget</span><span class="params">(Source s)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h2><p>该文例举了MapStruct的配置方式，以及一些最为常见的用法，还有很多其他高级功能没有提及，具体请看官方文档：<a target="_blank" rel="noopener" href="https://mapstruct.org/documentation/stable/reference/html">MapStruct 1.4.2.Final Reference Guide</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/java/" rel="tag"># java</a>
+              <a href="/tags/MapStruct/" rel="tag"># MapStruct</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2022/01/26/lombok%E4%BD%BF%E7%94%A8/" rel="prev" title="lombok使用">
+                  <i class="fa fa-chevron-left"></i> lombok使用
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2022/03/03/git%E5%B8%B8%E7%94%A8%E6%93%8D%E4%BD%9C/" rel="next" title="Git常用操作">
+                  Git常用操作 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments utterances-container"></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">你丶一顾倾城</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+<script class="next-config" data-name="utterances" type="application/json">{"enable":true,"repo":"skywaterliu/skywaterliu.github.io","issue_term":"pathname","theme":"github-light"}</script>
+<script src="/js/third-party/comments/utterances.js"></script>
+
+</body>
+</html>
