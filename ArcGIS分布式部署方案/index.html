@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.1.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"skywaterliu.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.11.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="编写不易，转载还请注明出处，感谢！    服务器规划 共使用四台Linux服务器，系统为 CentOS7.5  服务器ip域名软件192.168.192.100base.esri.comPortal For ArcGIS ArcGIS Server Datastore WebAdaptor192.168.192.101ga1.esri.comGeoAnalytics Server GA站点nfs共">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ArcGIS分布式部署方案">
+<meta property="og:url" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/index.html">
+<meta property="og:site_name" content="安之一隅">
+<meta property="og:description" content="编写不易，转载还请注明出处，感谢！    服务器规划 共使用四台Linux服务器，系统为 CentOS7.5  服务器ip域名软件192.168.192.100base.esri.comPortal For ArcGIS ArcGIS Server Datastore WebAdaptor192.168.192.101ga1.esri.comGeoAnalytics Server GA站点nfs共">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/hero_banner-temp.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/datastore-setting.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/datastore-setting-2.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/datastore-setting-3.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/web-adaport-setting01.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/web-adaport-setting03.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/web-adaport-setting04.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/web-adaport-setting05.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/nfs%E5%85%B1%E4%BA%AB%E9%85%8D%E7%BD%AE01.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/nfs%E5%85%B1%E4%BA%AB%E9%85%8D%E7%BD%AE02.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/ga%E9%9B%86%E7%BE%A401.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/ga%E9%9B%86%E7%BE%A402.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E6%97%B6%E7%A9%BA%E5%A4%A7%E6%95%B0%E6%8D%AEdatastore01.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E6%97%B6%E7%A9%BA%E5%A4%A7%E6%95%B0%E6%8D%AEdatastore02.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E6%97%B6%E7%A9%BA%E5%A4%A7%E6%95%B0%E6%8D%AEdatastore03.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E6%97%B6%E7%A9%BA%E5%A4%A7%E6%95%B0%E6%8D%AEdatastore04.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E9%85%8D%E7%BD%AE%E8%81%94%E5%90%88%E6%9C%8D%E5%8A%A1%E5%99%A801.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E9%85%8D%E7%BD%AE%E8%81%94%E5%90%88%E6%9C%8D%E5%8A%A1%E5%99%A802.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E9%85%8D%E7%BD%AE%E8%81%94%E5%90%88%E6%9C%8D%E5%8A%A1%E5%99%A803.png">
+<meta property="og:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E9%85%8D%E7%BD%AE%E6%89%98%E7%AE%A1%E6%9C%8D%E5%8A%A1%E5%99%A801.png">
+<meta property="article:published_time" content="2019-07-14T15:46:00.000Z">
+<meta property="article:modified_time" content="2019-07-15T07:55:26.191Z">
+<meta property="article:author" content="你丶一顾倾城">
+<meta property="article:tag" content="环境搭建">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/hero_banner-temp.png">
+
+
+<link rel="canonical" href="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/","path":"ArcGIS分布式部署方案/","title":"ArcGIS分布式部署方案"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>ArcGIS分布式部署方案 | 安之一隅</title>
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">安之一隅</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">莫听穿林打叶声，何妨吟啸且徐行。</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%A7%84%E5%88%92"><span class="nav-number">1.</span> <span class="nav-text">服务器规划</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%84%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%AE%89%E8%A3%85%E8%AF%B4%E6%98%8E"><span class="nav-number">2.</span> <span class="nav-text">各服务器安装说明</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#base-esri-com-192-168-192-100"><span class="nav-number">2.1.</span> <span class="nav-text">base.esri.com[192.168.192.100]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85ArcGIS-Server"><span class="nav-number">2.1.1.</span> <span class="nav-text">安装ArcGIS Server</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%A6%81%E6%B1%82"><span class="nav-number">2.1.1.1.</span> <span class="nav-text">系统要求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">2.1.1.2.</span> <span class="nav-text">准备工作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E7%B3%BB%E7%BB%9F%E6%97%B6%E9%97%B4"><span class="nav-number">2.1.1.2.1.</span> <span class="nav-text">修改系统时间</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B3%E9%97%AD%E9%98%B2%E7%81%AB%E5%A2%99"><span class="nav-number">2.1.1.2.2.</span> <span class="nav-text">关闭防火墙</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%94%A8%E6%88%B7%E5%92%8C%E7%BB%84%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-number">2.1.1.2.3.</span> <span class="nav-text">用户和组的创建</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E4%B8%BB%E6%9C%BA%E5%90%8D"><span class="nav-number">2.1.1.2.4.</span> <span class="nav-text">设置主机名</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9hosts"><span class="nav-number">2.1.1.2.5.</span> <span class="nav-text">修改hosts</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E7%B3%BB%E7%BB%9F%E5%8F%82%E6%95%B0"><span class="nav-number">2.1.1.2.6.</span> <span class="nav-text">修改系统参数</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%80%E5%A7%8B%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.1.3.</span> <span class="nav-text">开始安装</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%AE%89%E8%A3%85%E5%8C%85"><span class="nav-number">2.1.1.3.1.</span> <span class="nav-text">准备安装包</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A3%80%E9%AA%8C%E7%B3%BB%E7%BB%9F%E6%98%AF%E5%90%A6%E7%AC%A6%E5%90%88%E8%A6%81%E6%B1%82"><span class="nav-number">2.1.1.3.2.</span> <span class="nav-text">检验系统是否符合要求</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%AE%89%E8%A3%85"><span class="nav-number">2.1.1.3.3.</span> <span class="nav-text">执行安装</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Portal-for-ArcGIS"><span class="nav-number">2.1.2.</span> <span class="nav-text">安装Portal for ArcGIS</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%A6%81%E6%B1%82-1"><span class="nav-number">2.1.2.1.</span> <span class="nav-text">系统要求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%BF%87%E7%A8%8B"><span class="nav-number">2.1.2.2.</span> <span class="nav-text">安装过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85ArcGIS-DataStore"><span class="nav-number">2.1.3.</span> <span class="nav-text">安装ArcGIS DataStore</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%A6%81%E6%B1%82-2"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">系统要求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%BF%87%E7%A8%8B-1"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">安装过程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%A3%E5%8E%8B"><span class="nav-number">2.1.3.2.1.</span> <span class="nav-text">解压</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A3%80%E9%AA%8C%E7%B3%BB%E7%BB%9F%E7%8E%AF%E5%A2%83"><span class="nav-number">2.1.3.2.2.</span> <span class="nav-text">检验系统环境</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%AE%89%E8%A3%85-1"><span class="nav-number">2.1.3.2.3.</span> <span class="nav-text">执行安装</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEArcGIS-Server"><span class="nav-number">2.1.3.2.4.</span> <span class="nav-text">配置ArcGIS Server</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85ArcGIS-Web-Adaptor"><span class="nav-number">2.1.4.</span> <span class="nav-text">安装ArcGIS Web Adaptor</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E8%A6%81%E6%B1%82-3"><span class="nav-number">2.1.4.1.</span> <span class="nav-text">系统要求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E8%BF%87%E7%A8%8B-2"><span class="nav-number">2.1.4.2.</span> <span class="nav-text">安装过程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%A0%E9%99%A4CentOS7%E8%87%AA%E5%B8%A6%E7%9A%84OpenJDK"><span class="nav-number">2.1.4.2.1.</span> <span class="nav-text">删除CentOS7自带的OpenJDK</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Oracle-JDK"><span class="nav-number">2.1.4.2.2.</span> <span class="nav-text">安装Oracle JDK</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%A3%E5%8E%8Btomcat"><span class="nav-number">2.1.4.2.3.</span> <span class="nav-text">解压tomcat</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E7%A7%81%E9%92%A5%E5%92%8C%E8%AF%81%E4%B9%A6%E8%AF%B7%E6%B1%82"><span class="nav-number">2.1.4.2.4.</span> <span class="nav-text">创建私钥和证书请求</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%87%AA%E7%AD%BE%E5%90%8D%E8%AF%81%E4%B9%A6"><span class="nav-number">2.1.4.2.5.</span> <span class="nav-text">创建自签名证书</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEtomcat"><span class="nav-number">2.1.4.2.6.</span> <span class="nav-text">配置tomcat</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E5%92%8C%E9%AA%8C%E8%AF%81Tomcat"><span class="nav-number">2.1.4.2.7.</span> <span class="nav-text">启动和验证Tomcat</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A7%A3%E5%8E%8BWeb-Adaptor"><span class="nav-number">2.1.4.2.8.</span> <span class="nav-text">解压Web Adaptor</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Web-Adaptor"><span class="nav-number">2.1.4.2.9.</span> <span class="nav-text">安装Web Adaptor</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E4%B8%A4%E4%B8%AAweb-adaptor%E7%9A%84war%E5%8C%85"><span class="nav-number">2.1.4.2.10.</span> <span class="nav-text">部署两个web adaptor的war包</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEweb-adaptor"><span class="nav-number">2.1.4.2.11.</span> <span class="nav-text">配置web adaptor</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ga1-esri-com-192-168-192-101"><span class="nav-number">2.2.</span> <span class="nav-text">ga1.esri.com[192.168.192.101]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85ArcGIS-Server-1"><span class="nav-number">2.2.1.</span> <span class="nav-text">安装ArcGIS Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nfs%E5%85%B1%E4%BA%AB%E7%9B%AE%E5%BD%95%E5%88%9B%E5%BB%BA%E5%8F%8A%E6%9C%AC%E5%9C%B0%E7%9B%AE%E5%BD%95%E6%8C%82%E8%BD%BD"><span class="nav-number">2.2.2.</span> <span class="nav-text">nfs共享目录创建及本地目录挂载</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nfs%E5%AE%89%E8%A3%85-%E5%88%9B%E5%BB%BA%E5%85%B1%E4%BA%AB%E7%9B%AE%E5%BD%95"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">nfs安装+创建共享目录</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%A3%80%E6%9F%A5nfs%E4%BE%9D%E8%B5%96%E5%8C%85%E6%98%AF%E5%90%A6%E5%AE%89%E8%A3%85"><span class="nav-number">2.2.2.1.1.</span> <span class="nav-text">检查nfs依赖包是否安装</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%8C%85"><span class="nav-number">2.2.2.1.2.</span> <span class="nav-text">安装依赖包</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BC%80%E5%90%AFnfs%E4%BB%A5%E5%8F%8Arpcbind%E5%B9%B6%E8%AE%BE%E4%B8%BA%E5%BC%80%E6%9C%BA%E5%90%AF%E5%8A%A8"><span class="nav-number">2.2.2.1.3.</span> <span class="nav-text">开启nfs以及rpcbind并设为开机启动</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEnfs"><span class="nav-number">2.2.2.1.4.</span> <span class="nav-text">配置nfs</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8C%82%E8%BD%BD"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">挂载</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E6%8C%82%E8%BD%BD"><span class="nav-number">2.2.2.2.1.</span> <span class="nav-text">执行挂载</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%87%8D%E5%90%AF%E8%87%AA%E5%8A%A8%E6%8C%82%E8%BD%BD"><span class="nav-number">2.2.2.2.2.</span> <span class="nav-text">重启自动挂载</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">服务器配置</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ga2-esri-com-192-168-192-102"><span class="nav-number">2.3.</span> <span class="nav-text">ga2.esri.com[192.168.192.102]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#nfs%E6%8C%82%E8%BD%BD"><span class="nav-number">2.3.1.</span> <span class="nav-text">nfs挂载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85ArcGIS-Server-2"><span class="nav-number">2.3.2.</span> <span class="nav-text">安装ArcGIS Server</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#datastore-esri-com-192-168-192-103"><span class="nav-number">2.4.</span> <span class="nav-text">datastore.esri.com[192.168.192.103]</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85ArcGIS-DataStore-1"><span class="nav-number">2.4.1.</span> <span class="nav-text">安装ArcGIS DataStore</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E5%99%A8%E9%85%8D%E7%BD%AE-1"><span class="nav-number">3.</span> <span class="nav-text">服务器配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%94%E5%90%88ArcGIS-Server"><span class="nav-number">3.1.</span> <span class="nav-text">联合ArcGIS Server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%89%98%E7%AE%A1%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">3.2.</span> <span class="nav-text">配置托管服务器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%81%94%E5%90%88ArcGIS-GeoAnalytics-Server"><span class="nav-number">3.3.</span> <span class="nav-text">联合ArcGIS GeoAnalytics Server</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ArcGIS-%E7%9B%B8%E5%85%B3%E6%96%87%E6%A1%A3%E8%BF%9E%E6%8E%A5"><span class="nav-number">4.</span> <span class="nav-text">ArcGIS 相关文档连接</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">你丶一顾倾城</p>
+  <div class="site-description" itemprop="description">嗨害嗨！</div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">26</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">19</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/skywaterliu" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;skywaterliu" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:liutianshui17@gmail.com" title="E-Mail → mailto:liutianshui17@gmail.com" rel="noopener" target="_blank"><i class="envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://skywaterliu.github.io/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="你丶一顾倾城">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="安之一隅">
+      <meta itemprop="description" content="嗨害嗨！">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="ArcGIS分布式部署方案 | 安之一隅">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ArcGIS分布式部署方案
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-07-14 23:46:00" itemprop="dateCreated datePublished" datetime="2019-07-14T23:46:00+08:00">2019-07-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2019-07-15 15:55:26" itemprop="dateModified" datetime="2019-07-15T15:55:26+08:00">2019-07-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/ArcGIS/" itemprop="url" rel="index"><span itemprop="name">ArcGIS</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><strong>编写不易，转载还请注明出处，感谢！</strong></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/hero_banner-temp.png" alt="arcgis"></p>
+<!-- toc -->
+
+<span id="more"></span>
+
+<h1 id="服务器规划"><a href="#服务器规划" class="headerlink" title="服务器规划"></a>服务器规划</h1><p>共使用四台Linux服务器，系统为 CentOS7.5</p>
+<table>
+<thead>
+<tr>
+<th>服务器ip</th>
+<th>域名</th>
+<th>软件</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>192.168.192.100</td>
+<td>base.esri.com</td>
+<td>Portal For ArcGIS<br>ArcGIS Server<br>Datastore<br>WebAdaptor</td>
+</tr>
+<tr>
+<td>192.168.192.101</td>
+<td>ga1.esri.com</td>
+<td>GeoAnalytics Server<br>GA站点nfs共享目录</td>
+</tr>
+<tr>
+<td>192.168.192.102</td>
+<td>ga2.esri.com</td>
+<td>GeoAnalytics Server</td>
+</tr>
+<tr>
+<td>192.168.192.103</td>
+<td>datastore.esri.com</td>
+<td>DataStore（时空大数据存储）</td>
+</tr>
+</tbody></table>
+<h1 id="各服务器安装说明"><a href="#各服务器安装说明" class="headerlink" title="各服务器安装说明"></a>各服务器安装说明</h1><h2 id="base-esri-com-192-168-192-100"><a href="#base-esri-com-192-168-192-100" class="headerlink" title="base.esri.com[192.168.192.100]"></a>base.esri.com[192.168.192.100]</h2><h3 id="安装ArcGIS-Server"><a href="#安装ArcGIS-Server" class="headerlink" title="安装ArcGIS Server"></a>安装ArcGIS Server</h3><h4 id="系统要求"><a href="#系统要求" class="headerlink" title="系统要求"></a>系统要求</h4><ol>
+<li>内存&gt;8G </li>
+<li>硬盘可用空间&gt;20G</li>
+</ol>
+<h4 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h4><h5 id="修改系统时间"><a href="#修改系统时间" class="headerlink" title="修改系统时间"></a>修改系统时间</h5><p>目前的授权文件只到2018年7月，为个人学习使用，暂时以修改时间的方式规避，商业用途请支持正版。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@base ~]# date -s 20160101</span><br><span class="line">[root@base ~]# hwclock -w</span><br><span class="line">Fri Jan  1 00:00:00 EST 2016</span><br></pre></td></tr></table></figure>
+
+<h5 id="关闭防火墙"><a href="#关闭防火墙" class="headerlink" title="关闭防火墙"></a>关闭防火墙</h5><p>关闭并禁用开机启动</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@base ~]# systemctl stop firewalld.service</span><br><span class="line">[root@base ~]# systemctl disable firewalld.service</span><br></pre></td></tr></table></figure>
+<h5 id="用户和组的创建"><a href="#用户和组的创建" class="headerlink" title="用户和组的创建"></a>用户和组的创建</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@base ~]# groupadd esrichina</span><br><span class="line">[root@base ~]# useradd -g esrichina -m arcgis</span><br><span class="line">[root@base ~]# passwd arcgis</span><br></pre></td></tr></table></figure>
+<h5 id="设置主机名"><a href="#设置主机名" class="headerlink" title="设置主机名"></a>设置主机名</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@base ~]# hostnamectl set-hostname base.esri.com</span><br></pre></td></tr></table></figure>
+
+<h5 id="修改hosts"><a href="#修改hosts" class="headerlink" title="修改hosts"></a>修改hosts</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@base ~]# vim /etc/hosts</span><br><span class="line"></span><br><span class="line">127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4</span><br><span class="line">::1         localhost localhost.localdomain localhost6 localhost6.localdomain6</span><br><span class="line">192.168.192.100 base.esri.com base</span><br></pre></td></tr></table></figure>
+<p><code>注意</code>如果存在多个网卡，建议删除localhost所在行<br>查看网卡：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@base ~]# lspci | grep -i eth</span><br><span class="line">02:01.0 Ethernet controller: Intel Corporation 82545EM Gigabit Ethernet Controller (Copper) (rev 01)</span><br></pre></td></tr></table></figure>
+
+<h5 id="修改系统参数"><a href="#修改系统参数" class="headerlink" title="修改系统参数"></a>修改系统参数</h5><ol>
+<li>编辑 limits.conf文件<br>编辑&#x2F;etc&#x2F;security&#x2F;limits.conf文件，添加如下内容：<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">arcgis soft nofile 65535</span><br><span class="line">arcgis hard nofile 65535</span><br><span class="line">arcgis soft nproc 25059</span><br><span class="line">arcgis hard nproc 25059</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h4 id="开始安装"><a href="#开始安装" class="headerlink" title="开始安装"></a>开始安装</h4><h5 id="准备安装包"><a href="#准备安装包" class="headerlink" title="准备安装包"></a>准备安装包</h5><p>将安装包放入&#x2F;home&#x2F;arcgis&#x2F;setup  并将ArcGIS Server的压缩包解压</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-rwxr-xr-x. 1 arcgis esrichina  132907649 Feb 20 04:11 ArcGIS_License_Manager_Linux_105_154034.tar.gz</span><br><span class="line">drwxr-sr-x. 5 arcgis esrichina        100 Feb 20 04:18 ArcGISServer</span><br><span class="line">-rwxr-xr-x. 1 arcgis esrichina 2544647382 Feb 20 04:12 ArcGIS_Server_Linux_105_154052.tar.gz</span><br><span class="line">-rwxr-xr-x. 1 arcgis esrichina 1863558498 Feb 20 04:12 Portal_for_ArcGIS_Linux_105_154053.tar.gz</span><br><span class="line">-rwxr-xr-x. 1 arcgis esrichina   97511317 Feb 20 04:12 Web_Adaptor_Java_Linux_105_154055.tar.gz</span><br></pre></td></tr></table></figure>
+
+<h5 id="检验系统是否符合要求"><a href="#检验系统是否符合要求" class="headerlink" title="检验系统是否符合要求"></a>检验系统是否符合要求</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base ~]$ cd /home/arcgis/setup/ArcGISServer/serverdiag</span><br><span class="line">[arcgis@base serverdiag]$ ./serverdiag </span><br><span class="line">========================================================================</span><br><span class="line">                   ArcGIS Server 10.5 Diagnostic Tool</span><br><span class="line">                                    </span><br><span class="line">                        Hostname: base.esri.com</span><br><span class="line">========================================================================</span><br><span class="line"></span><br><span class="line"> DIAG000: Check for installation as root                       [PASSED]</span><br><span class="line"> DIAG001: Check for 64-bit architecture                        [PASSED]</span><br><span class="line"> DIAG002: Check OS version                                     [PASSED]</span><br><span class="line"> DIAG003: Check hostname for invalid characters                [PASSED]</span><br><span class="line"> DIAG024: Check /etc/hosts for hostname entry                  [PASSED]</span><br><span class="line"> DIAG004: Check installed packages                             [PASSED]</span><br><span class="line"> DIAG005: Check system limits                                  [PASSED]</span><br><span class="line"> DIAG008: Check HTTP port                                      [PASSED]</span><br><span class="line"> DIAG009: Check HTTPS port                                     [PASSED]</span><br><span class="line"> DIAG010: Check Xvfb ports                                     [PASSED]</span><br><span class="line"> DIAG020: Check hostname IP address mismatches                 [PASSED]</span><br><span class="line"> DIAG026: Check processes for ArcGIS core services             [N/A]</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">There were 0 failure(s) and 0 warning(s) found:</span><br></pre></td></tr></table></figure>
+<p>出现There were 0 failure(s) and 0 warning(s) found:即为通过</p>
+<h5 id="执行安装"><a href="#执行安装" class="headerlink" title="执行安装"></a>执行安装</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base setup]$ cd ArcGISServer</span><br><span class="line">[arcgis@base ArcGISServer]$ ./Setup -m silent -l yes -a /home/arcgis/setup/Server10.5.ecp</span><br><span class="line">========================================================================</span><br><span class="line">                   ArcGIS Server 10.5 Diagnostic Tool</span><br><span class="line">                                    </span><br><span class="line">                        Hostname: base.esri.com</span><br><span class="line">========================================================================</span><br><span class="line"></span><br><span class="line"> DIAG000: Check for installation as root                       [PASSED]</span><br><span class="line"> DIAG001: Check for 64-bit architecture                        [PASSED]</span><br><span class="line"> DIAG002: Check OS version                                     [PASSED]</span><br><span class="line"> DIAG003: Check hostname for invalid characters                [PASSED]</span><br><span class="line"> DIAG024: Check /etc/hosts for hostname entry                  [PASSED]</span><br><span class="line"> DIAG004: Check installed packages                             [PASSED]</span><br><span class="line"> DIAG005: Check system limits                                  [PASSED]</span><br><span class="line"> DIAG008: Check HTTP port                                      [PASSED]</span><br><span class="line"> DIAG009: Check HTTPS port                                     [PASSED]</span><br><span class="line"> DIAG010: Check Xvfb ports                                     [PASSED]</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">There were 0 failure(s) and 0 warning(s) found:</span><br><span class="line"></span><br><span class="line">[ArcGIS Server 10.5 Installation Details]</span><br><span class="line">UI Mode..................silent</span><br><span class="line">Agreed to Esri License...yes</span><br><span class="line">Authorization File......./home/arcgis/setup/Server10.5.ecp</span><br><span class="line">Installation Directory.../home/arcgis/server</span><br><span class="line"></span><br><span class="line">Starting installation of ArcGIS Server 10.5...</span><br><span class="line">...ArcGIS Server 10.5 installation is complete.</span><br><span class="line"></span><br><span class="line">You will be able to access ArcGIS Server Manager by navigating to http://base.esri.com:6080/arcgis/manager.</span><br></pre></td></tr></table></figure>
+
+<p>当出现<code>You will be able to access ArcGIS Server Manager by navigating to http://base.esri.com:6080/arcgis/manager.</code>说明安装成功。</p>
+<h3 id="安装Portal-for-ArcGIS"><a href="#安装Portal-for-ArcGIS" class="headerlink" title="安装Portal for ArcGIS"></a>安装Portal for ArcGIS</h3><h4 id="系统要求-1"><a href="#系统要求-1" class="headerlink" title="系统要求"></a>系统要求</h4><ol>
+<li>处理器：4 核（适用于 100 个并发用户）</li>
+<li>内存&#x2F;RAM：8 GB</li>
+<li>磁盘空间：10 GB</li>
+</ol>
+<h4 id="安装过程"><a href="#安装过程" class="headerlink" title="安装过程"></a>安装过程</h4><p>portal端需要安装dos2unix</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base portaldiag]$ sudo yum install dos2unix</span><br></pre></td></tr></table></figure>
+
+<p>其他与安装Server相同，另外需要portal端的ecp授权文件进行授权即可。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base portaldiag]$ pwd</span><br><span class="line">/home/arcgis/setup/PortalForArcGIS/portaldiag</span><br><span class="line">[arcgis@base portaldiag]$ ./portaldiag </span><br><span class="line">========================================================================</span><br><span class="line">                 Portal for ArcGIS 10.5 Diagnostic Tool</span><br><span class="line">                                    </span><br><span class="line">                        Hostname: base.esri.com</span><br><span class="line">========================================================================</span><br><span class="line"></span><br><span class="line"> DIAG000: Check for installation as root                       [PASSED]</span><br><span class="line"> DIAG001: Check for 64-bit architecture                        [PASSED]</span><br><span class="line"> DIAG002: Check OS version                                     [PASSED]</span><br><span class="line"> DIAG003: Check hostname for invalid characters                [PASSED]</span><br><span class="line"> DIAG005: Check system limits                                  [PASSED]</span><br><span class="line"> DIAG004: Check installed packages                             [PASSED]</span><br><span class="line"> DIAG016: Check Portal for ArcGIS ports                        [PASSED]</span><br><span class="line"> DIAG024: Check localhost resolution                           [PASSED]</span><br><span class="line"> DIAG029: Check file system type                               [PASSED]</span><br><span class="line"> DIAG020: Check hostname IP address mismatches                 [PASSED]</span><br><span class="line"> DIAG026: Check processes of Portal for ArcGIS core services   [N/A]</span><br><span class="line"> DIAG028: Check data directory                                 [N/A]</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">There were 0 failure(s) and 0 warning(s) found:</span><br></pre></td></tr></table></figure>
+
+
+<p><em><strong>portal端所涉及到的端口</strong></em></p>
+<p>Portal for ArcGIS 使用特定的端口进行通信。以下是可能需要防火墙允许的端口的描述。</p>
+<ul>
+<li>HTTP 端口 7080</li>
+</ul>
+<p>Portal for ArcGIS 通过端口 7080 进行通信，必须确保防火墙允许通过此端口进行 HTTP 通信。配置 Web Adaptor 以用于门户时，将引用 HTTP URL（例如，<a href="http://portal.domain.com:7080）。">http://portal.domain.com:7080）。</a></p>
+<ul>
+<li>HTTPS 端口 7443</li>
+</ul>
+<p>默认情况下，Portal for ArcGIS 使用 HTTPS 端口 7443 为需要用户凭据的通信进行加密。如不需要凭据，则使用 HTTP。如果已将门户配置为在所有通信中使用 HTTPS，则仅使用 HTTPS。有关详细信息，请参阅<a target="_blank" rel="noopener" href="http://enterprise.arcgis.com/zh-cn/portal/10.5/install/linux/configure-https.htm">配置 HTTPS</a>。</p>
+<ul>
+<li>内部使用的端口</li>
+</ul>
+<p>Portal for ArcGIS 使用端口 5701、7005、7099、7199、7654、7120 和 7220 进行计算机间通信。必须确保防火墙允许在这些端口上进行本地通信，并且其当前未被其他应用程序使用。</p>
+<p>配置高可用性门户时，索引服务使用端口 5701 和 5801 在两个门户计算机之间保持用户和项目搜索的同步。</p>
+<p>Portal for ArcGIS 可能还需要使用临时端口（有时称为动态端口）进行计算机间通信。临时端口通常是一个范围（通常介于 1024 和 5000 之间或 49152 到 65535 之间，而系统管理员可以自定义该范围）。您必须确保防火墙允许在这些特定端口和临时端口范围上进行计算机间通信。</p>
+<h3 id="安装ArcGIS-DataStore"><a href="#安装ArcGIS-DataStore" class="headerlink" title="安装ArcGIS DataStore"></a>安装ArcGIS DataStore</h3><h4 id="系统要求-2"><a href="#系统要求-2" class="headerlink" title="系统要求"></a>系统要求</h4><p>要安装和配置 ArcGIS Data Store，系统驱动器上至少需要有 13 GB 的可用磁盘空间。这是对具有一个空数据存储类型的计算机的最低磁盘空间要求；它没有将您要在该计算机上可能存储的数据存储或备份文件中存储的数据考虑在内。鉴于此，您应计划在具有大量可用磁盘空间的计算机上安装 ArcGIS Data Store。</p>
+<p><em><strong>注:</strong></em></p>
+<p>当该计算机的可用磁盘空间少于 10 GB 时，ArcGIS Data Store 便会开始记录磁盘空间不足的警告。硬盘驱动器的可用空间低于 1 GB 时，关系数据存储便会以只读模式存储，并且切片缓存和时空大数据存储会被关闭。</p>
+<p>为了确定在一台 ArcGIS Data Store 专用计算机上需要的磁盘空间量，需要考虑以下方面：</p>
+<ul>
+<li><p>软件安装使用 900 MB 的磁盘空间。</p>
+</li>
+<li><p>每新建一个数据存储（即使是空白的）都会占用额外的空间：</p>
+<ul>
+<li>切片缓存数据存储 &#x3D; 1 MB</li>
+<li>时空大数据存储 &#x3D; 200 MB</li>
+<li>关系数据存储 &#x3D; 2.5 GB*</li>
+</ul>
+<p>*随着时间的推移，一个空的关系数据存储将最多使用 2.5 GB 磁盘空间，以支持高可用性和可靠备份策略。配置关系数据存储后，将使用大约 200 MB 磁盘空间。一个空的关系数据存储所使用的磁盘空间量在 11 小时内将以大约 200 MB&#x2F;小时的速度增长，直到那时稳定在 2.5 GB。在使用过程中存储在系统中的数据是对此基线存储要求的补充。</p>
+</li>
+<li><p>您需要估算将数据存储在数据存储中时所需的磁盘空间量。</p>
+</li>
+<li><p>将备份文件存储在数据存储计算机上时也需要消耗磁盘空间。如果您没有将备份配置为写入共享系统驱动中，则必须考虑这部分额外使用的磁盘空间。</p>
+</li>
+</ul>
+<h4 id="安装过程-1"><a href="#安装过程-1" class="headerlink" title="安装过程"></a>安装过程</h4><h5 id="解压"><a href="#解压" class="headerlink" title="解压"></a>解压</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base setup]$ tar -zxvf ArcGIS_DataStore_Linux_105_154054.tar.gz</span><br></pre></td></tr></table></figure>
+<h5 id="检验系统环境"><a href="#检验系统环境" class="headerlink" title="检验系统环境"></a>检验系统环境</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base ArcGISDataStore_Linux]$ cd datastorediag/</span><br><span class="line">[arcgis@base datastorediag]$ ./datastorediag </span><br><span class="line">========================================================================</span><br><span class="line">                 ArcGIS Data Store 10.5 Diagnostic Tool</span><br><span class="line">                                    </span><br><span class="line">                        Hostname: base.esri.com</span><br><span class="line">========================================================================</span><br><span class="line"></span><br><span class="line"> Check for installation as root                                [PASSED]</span><br><span class="line"> Check for 64-bit architecture                                 [PASSED]</span><br><span class="line"> Check OS version                                              [PASSED]</span><br><span class="line"> Check hostname for invalid characters                         [PASSED]</span><br><span class="line"> Check installed packages                                      [PASSED]</span><br><span class="line"> Check ArcGIS Data Store ports                                 [PASSED]</span><br><span class="line"> Check hostname IP address mismatches                          [PASSED]</span><br><span class="line"> Check Spatiotemporal big data store requirements              [WARNING]</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">There were 0 failure(s) and 1 warning(s) found:</span><br><span class="line"></span><br><span class="line">WARNINGS:</span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">*** Check Spatiotemporal big data store requirements: If you will</span><br><span class="line">be using Spatiotemporal big data store, please check the system</span><br><span class="line">requirements.  One or more Spatiotemporal big data store requirements</span><br><span class="line">were not met:</span><br><span class="line"></span><br><span class="line">     1.) The vm.max_map_count is set too low (65530). Run sysctl -w</span><br><span class="line">     vm.max_map_count=262144 or set vm.max_map_count to at least 262144</span><br><span class="line">     in /etc/sysctl.conf:</span><br><span class="line"></span><br><span class="line">	vm.max_map_count = 262144</span><br><span class="line"></span><br><span class="line">     2.) Memory swappiness is set to 30.  Set vm.swappiness to 1 in</span><br><span class="line">     /etc/sysctl.conf:</span><br><span class="line"></span><br><span class="line">	vm.swappiness = 1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>根据提示，需要修改相关系统参数，切换为root用户，执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@base ~]# sysctl -w vm.swappiness=1</span><br><span class="line">[root@base ~]# sysctl -w vm.max_map_count=262144</span><br><span class="line">[root@base ~]# echo vm.swappiness = 1 &gt;&gt; /etc/sysctl.conf</span><br><span class="line">[root@base ~]# echo vm.max_map_count=262144 &gt;&gt; /etc/sysctl.conf</span><br></pre></td></tr></table></figure>
+
+<h5 id="执行安装-1"><a href="#执行安装-1" class="headerlink" title="执行安装"></a>执行安装</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base ArcGISDataStore_Linux]$ ./Setup -m silent -l Yes</span><br><span class="line">========================================================================</span><br><span class="line">                 ArcGIS Data Store 10.5 Diagnostic Tool</span><br><span class="line">                                    </span><br><span class="line">                        Hostname: base.esri.com</span><br><span class="line">========================================================================</span><br><span class="line"></span><br><span class="line"> Check for installation as root                                [PASSED]</span><br><span class="line"> Check for 64-bit architecture                                 [PASSED]</span><br><span class="line"> Check OS version                                              [PASSED]</span><br><span class="line"> Check hostname for invalid characters                         [PASSED]</span><br><span class="line"> Check installed packages                                      [PASSED]</span><br><span class="line"> Check ArcGIS Data Store ports                                 [PASSED]</span><br><span class="line"> Check hostname IP address mismatches                          [PASSED]</span><br><span class="line"> Check Spatiotemporal big data store requirements              [PASSED]</span><br><span class="line"></span><br><span class="line">------------------------------------------------------------------------</span><br><span class="line">There were 0 failure(s) and 0 warning(s) found:</span><br><span class="line"></span><br><span class="line">[ArcGIS Data Store 10.5 Installation Details]</span><br><span class="line">UI Mode..................silent</span><br><span class="line">Agreed to Esri License...yes</span><br><span class="line">Installation Directory.../home/arcgis/arcgis/datastore</span><br><span class="line"></span><br><span class="line">Starting installation of ArcGIS Data Store 10.5...</span><br><span class="line">...ArcGIS Data Store 10.5 installation is complete.</span><br><span class="line"></span><br><span class="line">You will be able to configure ArcGIS Data Store 10.5 by navigating to https://localhost:2443/arcgis/datastore.</span><br></pre></td></tr></table></figure>
+
+<h5 id="配置ArcGIS-Server"><a href="#配置ArcGIS-Server" class="headerlink" title="配置ArcGIS Server"></a>配置ArcGIS Server</h5><p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/datastore-setting.png" alt="datastore-setting"></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/datastore-setting-2.png"></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/datastore-setting-3.png"></p>
+<h3 id="安装ArcGIS-Web-Adaptor"><a href="#安装ArcGIS-Web-Adaptor" class="headerlink" title="安装ArcGIS Web Adaptor"></a>安装ArcGIS Web Adaptor</h3><h4 id="系统要求-3"><a href="#系统要求-3" class="headerlink" title="系统要求"></a>系统要求</h4><h4 id="安装过程-2"><a href="#安装过程-2" class="headerlink" title="安装过程"></a>安装过程</h4><h5 id="删除CentOS7自带的OpenJDK"><a href="#删除CentOS7自带的OpenJDK" class="headerlink" title="删除CentOS7自带的OpenJDK"></a>删除CentOS7自带的OpenJDK</h5><p>执行<code>java -version</code>，发现</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base ArcGISDataStore_Linux]$ java -version</span><br><span class="line">openjdk version &quot;1.8.0_191&quot;</span><br><span class="line">OpenJDK Runtime Environment (build 1.8.0_191-b12)</span><br><span class="line">OpenJDK 64-Bit Server VM (build 25.191-b12, mixed mode)</span><br></pre></td></tr></table></figure>
+
+<p>使用的是自带的OpenJDK，所以要先卸载掉，用Oracle JDK1.8。  </p>
+<p>执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base ArcGISDataStore_Linux]$ rpm -qa|grep java</span><br><span class="line">javapackages-tools-3.4.1-11.el7.noarch</span><br><span class="line">java-1.7.0-openjdk-headless-1.7.0.201-2.6.16.1.el7_6.x86_64</span><br><span class="line">java-1.7.0-openjdk-1.7.0.201-2.6.16.1.el7_6.x86_64</span><br><span class="line">java-1.8.0-openjdk-1.8.0.191.b12-1.el7_6.x86_64</span><br><span class="line">tzdata-java-2018i-1.el7.noarch</span><br><span class="line">java-1.8.0-openjdk-headless-1.8.0.191.b12-1.el7_6.x86_64</span><br><span class="line">python-javapackages-3.4.1-11.el7.noarch</span><br></pre></td></tr></table></figure>
+
+<p>执行</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rpm -e --nodeps java-1.7.0-openjdk-headless</span><br><span class="line">rpm -e --nodeps java-1.7.0-openjdk</span><br><span class="line">rpm -e --nodeps java-1.8.0-openjdk</span><br><span class="line">rpm -e --nodeps java-1.8.0-openjdk-headless</span><br></pre></td></tr></table></figure>
+
+<h5 id="安装Oracle-JDK"><a href="#安装Oracle-JDK" class="headerlink" title="安装Oracle JDK"></a>安装Oracle JDK</h5><p>解压Oracle的jdk到&#x2F;usr&#x2F;local&#x2F;java目录下，并配置环境变量</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">echo &#x27;export JAVA_HOME=/usr/local/java&#x27; &gt;&gt; /etc/profile.d/java.sh</span><br><span class="line">echo &#x27;export PATH=$PATH:$JAVA_HOME/bin&#x27; &gt;&gt; /etc/profile.d/java.sh</span><br><span class="line">echo &#x27;export CLASSPATH=.:$JAVA_HOME/jre/lib/rt.jar:$JAVA_HOME/lib/dt.jar:$JAVA_HOME/lib/tools.jar&#x27; &gt;&gt; /etc/profile.d/java.sh</span><br><span class="line">source /etc/profile</span><br></pre></td></tr></table></figure>
+
+<h5 id="解压tomcat"><a href="#解压tomcat" class="headerlink" title="解压tomcat"></a>解压tomcat</h5><p>把tomcat解压到<code>/usr/local/tomcat8</code></p>
+<h5 id="创建私钥和证书请求"><a href="#创建私钥和证书请求" class="headerlink" title="创建私钥和证书请求"></a>创建私钥和证书请求</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[root@base tomcat8]# openssl req -newkey rsa:2048 -nodes -keyout /usr/local/tomcat8/esrixa.key -x509 -days 365 -out /usr/local/tomcat8/esrixa.crt</span><br><span class="line">Generating a 2048 bit RSA private key</span><br><span class="line">................................................................+++</span><br><span class="line">........+++</span><br><span class="line">writing new private key to &#x27;/usr/local/tomcat8/esrixa.key&#x27;</span><br><span class="line">-----</span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line">For some fields there will be a default value,</span><br><span class="line">If you enter &#x27;.&#x27;, the field will be left blank.</span><br><span class="line">-----</span><br><span class="line">Country Name (2 letter code) [XX]:cn</span><br><span class="line">State or Province Name (full name) []:jiangsu</span><br><span class="line">Locality Name (eg, city) [Default City]:nanjing</span><br><span class="line">Organization Name (eg, company) [Default Company Ltd]:esri</span><br><span class="line">Organizational Unit Name (eg, section) []:esri</span><br><span class="line">Common Name (eg, your name or your server&#x27;s hostname) []:base.esri.com</span><br><span class="line">Email Address []:1029743469@qq.com</span><br></pre></td></tr></table></figure>
+
+<h5 id="创建自签名证书"><a href="#创建自签名证书" class="headerlink" title="创建自签名证书"></a>创建自签名证书</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@base tomcat8]# openssl pkcs12 -inkey /usr/local/tomcat8/esrixa.key -in /usr/local/tomcat8/esrixa.crt -export -out /usr/local/tomcat8/esrixa.pfx</span><br><span class="line">Enter Export Password:</span><br><span class="line">Verifying - Enter Export Password:</span><br></pre></td></tr></table></figure>
+
+<p>此处密码为p@ssw0rd</p>
+<p><em><strong>使用自签名证书会出现的问题</strong></em></p>
+<p>创建自签名证书不应被视作生产环境的有效选项，因为这将导致异常结果以及所有门户用户的不良用户体验。</p>
+<p>仅由网站所有者签名的证书称为自签名证书。自签名证书通常用于仅对组织内部 (LAN) 网络上的用户可用的网站上。如果与外部网络中的使用自签名证书的网站进行通信，您将无法验证颁发证书的站点是否确实代表其声称代表的一方。您可能实际上正与恶意方进行通信，使您的信息处于危险之中。</p>
+<p>首次设置门户时，可能会使用自签名证书进行初步测试，以帮助您快速验证是否配置成功。但是，如果使用自签名证书，请注意在测试期间将遇到如下状况：</p>
+<ul>
+<li>有关不受信任站点的 Web 浏览器和 ArcGIS Desktop 警告。通常，Web 浏览器遇到自签名证书时将显示警告消息并要求您确认是否继续前往该站点。只要您使用自签名证书，许多浏览器就会显示警告图标或对地址栏标红。如果使用自签名证书配置门户，那么您就能够看到这些类型的警告。</li>
+<li>无法在门户地图查看器中打开联合服务、无法将受保护的服务项添加到门户、无法在联合服务器中登录到 ArcGIS Server Manager 以及无法从 Esri Maps for Office 连接到门户。</li>
+<li>打印托管服务以及从客户端应用程序中访问门户时出现异常行为。</li>
+<li>无法从 Esri Maps for Office 登录至门户，除非在运行 Esri Maps for Office 的计算机上将自签名证书安装到<strong>受信任根证书颁发机构</strong>证书库。</li>
+</ul>
+<h5 id="配置tomcat"><a href="#配置tomcat" class="headerlink" title="配置tomcat"></a>配置tomcat</h5><p>开启https</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@base tomcat8]# vim /usr/local/tomcat8/conf/server.xml</span><br></pre></td></tr></table></figure>
+<p>修改Connector的端口为80，443</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- 此处省略 --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">Server</span> <span class="attr">port</span>=<span class="string">&quot;8005&quot;</span> <span class="attr">shutdown</span>=<span class="string">&quot;SHUTDOWN&quot;</span>&gt;</span></span><br><span class="line">   <span class="comment">&lt;!-- 此处省略 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Service</span> <span class="attr">name</span>=<span class="string">&quot;Catalina&quot;</span>&gt;</span></span><br><span class="line">  <span class="comment">&lt;!-- 此处省略 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Connector</span> <span class="attr">port</span>=<span class="string">&quot;80&quot;</span> <span class="attr">protocol</span>=<span class="string">&quot;HTTP/1.1&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">connectionTimeout</span>=<span class="string">&quot;20000&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">redirectPort</span>=<span class="string">&quot;443&quot;</span> /&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">Connector</span> <span class="attr">port</span>=<span class="string">&quot;443&quot;</span> <span class="attr">protocol</span>=<span class="string">&quot;org.apache.coyote.http11.Http11NioProtocol&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">maxThreads</span>=<span class="string">&quot;150&quot;</span> <span class="attr">SSLEnabled</span>=<span class="string">&quot;true&quot;</span> <span class="attr">scheme</span>=<span class="string">&quot;https&quot;</span> <span class="attr">secure</span>=<span class="string">&quot;true&quot;</span> <span class="attr">clientAuth</span>=<span class="string">&quot;false&quot;</span> <span class="attr">sslProtocol</span>=<span class="string">&quot;TLS&quot;</span> <span class="attr">keystoreFile</span>=<span class="string">&quot;/usr/local/tomcat8/esrixa.pfx&quot;</span> <span class="attr">keystoreType</span>=<span class="string">&quot;pkcs12&quot;</span> <span class="attr">keystorePass</span>=<span class="string">&quot;p@ssw0rd&quot;</span> &gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">Connector</span>&gt;</span></span><br><span class="line">    <span class="comment">&lt;!-- A &quot;Connector&quot; using the shared thread pool--&gt;</span></span><br><span class="line">    <span class="comment">&lt;!--</span></span><br><span class="line"><span class="comment">    &lt;Connector executor=&quot;tomcatThreadPool&quot;</span></span><br><span class="line"><span class="comment">               port=&quot;8080&quot; protocol=&quot;HTTP/1.1&quot;</span></span><br><span class="line"><span class="comment">               connectionTimeout=&quot;20000&quot;</span></span><br><span class="line"><span class="comment">               redirectPort=&quot;8443&quot; /&gt;</span></span><br><span class="line"><span class="comment">    --&gt;</span></span><br><span class="line"> <span class="comment">&lt;!-- 此处省略 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">Service</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">Server</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="启动和验证Tomcat"><a href="#启动和验证Tomcat" class="headerlink" title="启动和验证Tomcat"></a>启动和验证Tomcat</h5><p>修改root启动tomcat的权限。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[root@base tomcat8]# chmod -R 777 /usr/local/tomcat8</span><br></pre></td></tr></table></figure>
+
+<p>启动tomcat</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@base tomcat8]# cd bin</span><br><span class="line">[root@base bin]# ./startup.sh</span><br></pre></td></tr></table></figure>
+
+<h5 id="解压Web-Adaptor"><a href="#解压Web-Adaptor" class="headerlink" title="解压Web Adaptor"></a>解压Web Adaptor</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base ArcGISDataStore_Linux]$ cd /home/arcgis/setup</span><br><span class="line">[arcgis@base setup]$ tar -zxvf Web_Adaptor_Java_Linux_105_154055.tar.gz </span><br></pre></td></tr></table></figure>
+
+<h5 id="安装Web-Adaptor"><a href="#安装Web-Adaptor" class="headerlink" title="安装Web Adaptor"></a>安装Web Adaptor</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base WebAdaptor]$ ./Setup -m silent -l yes</span><br><span class="line">[ArcGIS Web Adaptor (Java Platform) 10.5 Installation Details]</span><br><span class="line">UI Mode..................silent</span><br><span class="line">Agreed to Esri License...yes</span><br><span class="line">Installation Directory.../home/arcgis/webadaptor10.5</span><br><span class="line"></span><br><span class="line">Starting installation of ArcGIS Web Adaptor (Java Platform) 10.5...</span><br><span class="line">...ArcGIS Web Adaptor (Java Platform) 10.5 installation is complete.</span><br></pre></td></tr></table></figure>
+
+<h5 id="部署两个web-adaptor的war包"><a href="#部署两个web-adaptor的war包" class="headerlink" title="部署两个web adaptor的war包"></a>部署两个web adaptor的war包</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base java]$ cd /home/arcgis/webadaptor10.5/java</span><br><span class="line">[arcgis@base java]$ ll</span><br><span class="line">total 23292</span><br><span class="line">-rwxr-xr-x.  1 arcgis esrichina 23830437 Nov  3  2016 arcgis.war</span><br><span class="line">-rwxr-xr-x.  1 arcgis esrichina      340 Nov  3  2016 clientaccesspolicy.xml</span><br><span class="line">-rwxr-xr-x.  1 arcgis esrichina      224 Nov  3  2016 crossdomain.xml</span><br><span class="line">-rwxr-xr-x.  1 arcgis esrichina       70 Jan  1 03:50 init_webadaptor.csh</span><br><span class="line">-rwxr-xr-x.  1 arcgis esrichina       87 Jan  1 03:50 init_webadaptor.sh</span><br><span class="line">drwxr-xr-x.  2 arcgis esrichina       22 Jan  1 03:50 License</span><br><span class="line">drwxr-xr-x.  3 arcgis esrichina      122 Jan  1 03:50 Support</span><br><span class="line">drwxrwxr-x.  2 arcgis esrichina       85 Jan  1 03:50 tools</span><br><span class="line">-rwxr-xr-x.  1 arcgis esrichina     1549 Jan  1 03:50 uninstall_WebAdaptor</span><br><span class="line">drwxrwxr-x. 10 arcgis esrichina       92 Jan  1 03:50 WebAdaptorHelp</span><br></pre></td></tr></table></figure>
+
+<p>这里有一个arcgis.war，待会作为portal端的web adaptor，另外，我们复制一份并并命名为server.war，用于server端的web adaptor。都放到之前所配置的tomcat的webapp目录中。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[arcgis@base java]$ cp /home/arcgis/webadaptor10.5/java/arcgis.war /usr/local/tomcat8/webapps/</span><br><span class="line">[arcgis@base java]$ cp /home/arcgis/webadaptor10.5/java/arcgis.war /usr/local/tomcat8/webapps/server.war</span><br></pre></td></tr></table></figure>
+
+<h5 id="配置web-adaptor"><a href="#配置web-adaptor" class="headerlink" title="配置web adaptor"></a>配置web adaptor</h5><p>过程记录如下</p>
+<p>___注意：___访问web adaptor需要在其所在的主机进行操作</p>
+<p>先配server的，访问base.esri.com&#x2F;server</p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/web-adaport-setting01.png"></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/web-adaport-setting03.png"></p>
+<p>再配portal端的web adaptor，访问base.esri.com&#x2F;arcgis</p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/web-adaport-setting04.png"></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/web-adaport-setting05.png" alt="web-adaport-setting05"></p>
+<blockquote>
+<p>这里是portal的用户名及密码<br>user:admin<br>password:admin123</p>
+</blockquote>
+<h2 id="ga1-esri-com-192-168-192-101"><a href="#ga1-esri-com-192-168-192-101" class="headerlink" title="ga1.esri.com[192.168.192.101]"></a>ga1.esri.com[192.168.192.101]</h2><h3 id="安装ArcGIS-Server-1"><a href="#安装ArcGIS-Server-1" class="headerlink" title="安装ArcGIS Server"></a>安装ArcGIS Server</h3><p>操作过程同base.esri.com</p>
+<p>此处遇到一个问题，出现了ArcGIS Server无法启动的情况，报错信息为：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">Thu Feb 21 21:52:42 EST 2019:java.lang.RuntimeException: Failed to start JMX Server</span><br><span class="line">	at com.esri.arcgis.discovery.util.JMXServerController.start(JMXServerController.java:49)</span><br><span class="line">	at com.esri.arcgis.discovery.nodeagent.impl.NodeAgent.startJMXServer(NodeAgent.java:415)</span><br><span class="line">	at com.esri.arcgis.discovery.nodeagent.impl.NodeAgent.start(NodeAgent.java:134)</span><br><span class="line">	at com.esri.arcgis.discovery.nodeagent.impl.Main.start(Main.java:56)</span><br><span class="line">	at com.esri.arcgis.discovery.nodeagent.impl.Main.main(Main.java:299)</span><br><span class="line">Caused by: java.lang.IllegalArgumentException: Port value out of range: 65536</span><br><span class="line">	at java.net.ServerSocket.<span class="tag">&lt;<span class="name">init</span>&gt;</span>(ServerSocket.java:232)</span><br><span class="line">	at java.net.ServerSocket.<span class="tag">&lt;<span class="name">init</span>&gt;</span>(ServerSocket.java:181)</span><br><span class="line">	at com.esri.arcgis.discovery.util.IPUtil.isPortAvailable(IPUtil.java:668)</span><br><span class="line">	at com.esri.arcgis.discovery.util.JMXServerController.a(JMXServerController.java:213)</span><br><span class="line">	at com.esri.arcgis.discovery.util.JMXServerController.start(JMXServerController.java:38)</span><br><span class="line">	... 4 more</span><br><span class="line">Exception in thread &quot;main&quot; com.esri.arcgis.discovery.nodeagent.NodeAgentException: Could not start RMI connector. An instance of NodeAgent may be running or the JMX-RMI port is in use by another process.</span><br><span class="line">	at com.esri.arcgis.discovery.nodeagent.impl.NodeAgent.start(NodeAgent.java:137)</span><br><span class="line">	at com.esri.arcgis.discovery.nodeagent.impl.Main.start(Main.java:56)</span><br><span class="line">	at com.esri.arcgis.discovery.nodeagent.impl.Main.main(Main.java:299)</span><br><span class="line">Caused by: java.lang.RuntimeException: Failed to start JMX Server</span><br><span class="line">	at com.esri.arcgis.discovery.util.JMXServerController.start(JMXServerController.java:49)</span><br><span class="line">	at com.esri.arcgis.discovery.nodeagent.impl.NodeAgent.startJMXServer(NodeAgent.java:415)</span><br><span class="line">	at com.esri.arcgis.discovery.nodeagent.impl.NodeAgent.start(NodeAgent.java:134)</span><br><span class="line">	... 2 more</span><br><span class="line">Caused by: java.lang.IllegalArgumentException: Port value out of range: 65536</span><br><span class="line">	at java.net.ServerSocket.<span class="tag">&lt;<span class="name">init</span>&gt;</span>(ServerSocket.java:232)</span><br><span class="line">	at java.net.ServerSocket.<span class="tag">&lt;<span class="name">init</span>&gt;</span>(ServerSocket.java:181)</span><br><span class="line">	at com.esri.arcgis.discovery.util.IPUtil.isPortAvailable(IPUtil.java:668)</span><br><span class="line">	at com.esri.arcgis.discovery.util.JMXServerController.a(JMXServerController.java:213)</span><br><span class="line">	at com.esri.arcgis.discovery.util.JMXServerController.start(JMXServerController.java:38)</span><br><span class="line">	... 4 more</span><br></pre></td></tr></table></figure>
+
+<p>通过测试发现，在使用虚拟机环境时，该101服务器虚拟机为同一个虚拟机模板复制过来的，无法在两台同源的虚拟机上同时启动ArcGIS Server，具体原因还没找到，暂时的解决办法是，不采用复制虚拟机的方法，而是重新建一个虚拟机并安装CentOS7，在全新的环境安装ArcGIS Server。</p>
+<p>启动完成后创建新站点，</p>
+<p><strong>PS: 问题原因找到了，每台机器的网卡UUID不能相同，修改了之后重启网络服务就好了。不过按道理来说网卡的UUID只应该在应用层面有效才对，对于不同机器应该不影响。推测可能是arcgis对该变量有引用，会根据此扫描局域网内相关机器，所以导致查询端口查到另一台机器上了，最终端口出现溢出</strong></p>
+<h3 id="nfs共享目录创建及本地目录挂载"><a href="#nfs共享目录创建及本地目录挂载" class="headerlink" title="nfs共享目录创建及本地目录挂载"></a>nfs共享目录创建及本地目录挂载</h3><h4 id="nfs安装-创建共享目录"><a href="#nfs安装-创建共享目录" class="headerlink" title="nfs安装+创建共享目录"></a>nfs安装+创建共享目录</h4><h5 id="检查nfs依赖包是否安装"><a href="#检查nfs依赖包是否安装" class="headerlink" title="检查nfs依赖包是否安装"></a>检查nfs依赖包是否安装</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -qa nfs-utils rpcbind</span><br></pre></td></tr></table></figure>
+
+<h5 id="安装依赖包"><a href="#安装依赖包" class="headerlink" title="安装依赖包"></a>安装依赖包</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum install -y nfs-utils rpcbind</span><br></pre></td></tr></table></figure>
+
+<h5 id="开启nfs以及rpcbind并设为开机启动"><a href="#开启nfs以及rpcbind并设为开机启动" class="headerlink" title="开启nfs以及rpcbind并设为开机启动"></a>开启nfs以及rpcbind并设为开机启动</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">[root@ga1 yum.repos.d]# systemctl start nfs</span><br><span class="line">[root@ga1 yum.repos.d]# systemctl status nfs</span><br><span class="line">● nfs-server.service - NFS server and services</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/nfs-server.service; disabled; vendor preset: disabled)</span><br><span class="line">   Active: active (exited) since Fri 2019-02-22 01:14:36 EST; 2s ago</span><br><span class="line">  Process: 37844 ExecStartPost=/bin/sh -c if systemctl -q is-active gssproxy; then systemctl restart gssproxy ; fi (code=exited, status=0/SUCCESS)</span><br><span class="line">  Process: 37827 ExecStart=/usr/sbin/rpc.nfsd $RPCNFSDARGS (code=exited, status=0/SUCCESS)</span><br><span class="line">  Process: 37825 ExecStartPre=/usr/sbin/exportfs -r (code=exited, status=0/SUCCESS)</span><br><span class="line"> Main PID: 37827 (code=exited, status=0/SUCCESS)</span><br><span class="line">   CGroup: /system.slice/nfs-server.service</span><br><span class="line"></span><br><span class="line">Feb 22 01:14:36 ga1.esri.com systemd[1]: Starting NFS server and services...</span><br><span class="line">Feb 22 01:14:36 ga1.esri.com systemd[1]: Started NFS server and services.</span><br><span class="line">[root@ga1 yum.repos.d]# systemctl start rpcbind</span><br><span class="line">[root@ga1 yum.repos.d]# systemctl status rpcbind</span><br><span class="line">● rpcbind.service - RPC bind service</span><br><span class="line">   Loaded: loaded (/usr/lib/systemd/system/rpcbind.service; enabled; vendor preset: enabled)</span><br><span class="line">   Active: active (running) since Fri 2019-02-22 01:14:31 EST; 26s ago</span><br><span class="line">  Process: 37802 ExecStart=/sbin/rpcbind -w $RPCBIND_ARGS (code=exited, status=0/SUCCESS)</span><br><span class="line"> Main PID: 37803 (rpcbind)</span><br><span class="line">   CGroup: /system.slice/rpcbind.service</span><br><span class="line">           └─37803 /sbin/rpcbind -w</span><br><span class="line"></span><br><span class="line">Feb 22 01:14:31 ga1.esri.com systemd[1]: Starting RPC bind service...</span><br><span class="line">Feb 22 01:14:31 ga1.esri.com systemd[1]: Started RPC bind service.</span><br><span class="line">[root@ga1 yum.repos.d]# systemctl enable nfs</span><br><span class="line">Created symlink from /etc/systemd/system/multi-user.target.wants/nfs-server.service to /usr/lib/systemd/system/nfs-server.service.</span><br><span class="line">[root@ga1 yum.repos.d]# systemctl enable rpcbind</span><br></pre></td></tr></table></figure>
+
+<h5 id="配置nfs"><a href="#配置nfs" class="headerlink" title="配置nfs"></a>配置nfs</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[root@ga1 yum.repos.d]# mkdir -p /home/data/gaserver</span><br><span class="line">[root@ga1 yum.repos.d]# chown -R arcgis:esrichina /home/data</span><br><span class="line">[root@ga1 yum.repos.d]# mkdir -p /usr/local/nfsShareFiles</span><br><span class="line">[root@ga1 yum.repos.d]# chmod o+w /usr/local/nfsShareFiles</span><br><span class="line">[root@ga1 yum.repos.d]# vi etc/exports</span><br></pre></td></tr></table></figure>
+
+<p>添加：<code>/usr/local/nfsShareFiles 192.168.192.0/24(rw,sync,all_squash)</code></p>
+<p>其中<code>/usr/local/nfsShareFiles</code>即为需要共享的目录</p>
+<p>重启nfs</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">exportfs -r</span><br></pre></td></tr></table></figure>
+
+<p>查看本机挂在情况</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@ga1 yum.repos.d]# showmount -e 127.0.0.1</span><br><span class="line">Export list for 127.0.0.1:</span><br><span class="line">/usr/local/nfsShareFiles 192.168.192.0/24</span><br></pre></td></tr></table></figure>
+<h4 id="挂载"><a href="#挂载" class="headerlink" title="挂载"></a>挂载</h4><h5 id="执行挂载"><a href="#执行挂载" class="headerlink" title="执行挂载"></a>执行挂载</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">[root@ga1 yum.repos.d]# mount -t nfs 192.168.192.101:/usr/local/nfsShareFiles /home/data/gaserver</span><br><span class="line">[root@ga1 yum.repos.d]# df -h</span><br><span class="line">Filesystem                                Size  Used Avail Use% Mounted on</span><br><span class="line">/dev/mapper/centos-root                    22G   12G  9.6G  56% /</span><br><span class="line">devtmpfs                                  1.9G     0  1.9G   0% /dev</span><br><span class="line">tmpfs                                     1.9G     0  1.9G   0% /dev/shm</span><br><span class="line">tmpfs                                     1.9G   17M  1.9G   1% /run</span><br><span class="line">tmpfs                                     1.9G     0  1.9G   0% /sys/fs/cgroup</span><br><span class="line">/dev/sda1                                1014M  169M  846M  17% /boot</span><br><span class="line">tmpfs                                     378M     0  378M   0% /run/user/0</span><br><span class="line">tmpfs                                     378M     0  378M   0% /run/user/1000</span><br><span class="line">192.168.192.101:/usr/local/nfsShareFiles   22G   12G  9.6G  56% /home/data/gaserver</span><br></pre></td></tr></table></figure>
+
+<h5 id="重启自动挂载"><a href="#重启自动挂载" class="headerlink" title="重启自动挂载"></a>重启自动挂载</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@ga2 ~]# chmod +x /etc/rc.d/rc.local</span><br><span class="line">[root@ga2 ~]# vim /etc/rc.local</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">添加下面一行</span></span><br><span class="line">bin/mount -t nfs 192.168.192.101:/usr/local/nfsShareFiles /home/data/gaserver</span><br></pre></td></tr></table></figure>
+
+
+
+<p><em><strong>[相关参考资料]</strong></em></p>
+<p>[nfs服务权限配置][<a target="_blank" rel="noopener" href="https://blog.51cto.com/12332766/2126316]">https://blog.51cto.com/12332766/2126316]</a></p>
+<p>[CentOS7上实现NFS共享][<a target="_blank" rel="noopener" href="https://www.linuxidc.com/Linux/2017-06/144467.htm]">https://www.linuxidc.com/Linux/2017-06/144467.htm]</a></p>
+<h4 id="服务器配置"><a href="#服务器配置" class="headerlink" title="服务器配置"></a>服务器配置</h4><p>将&#x2F;home&#x2F;data&#x2F;gaserver作为配置目录</p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/nfs%E5%85%B1%E4%BA%AB%E9%85%8D%E7%BD%AE01.png"></p>
+<p>一直下一步直到完成。</p>
+<p>进入服务器-&gt;站点-&gt;GIS服务器&gt;目录，可见：</p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/nfs%E5%85%B1%E4%BA%AB%E9%85%8D%E7%BD%AE02.png"></p>
+<p>nfs配置完成</p>
+<h2 id="ga2-esri-com-192-168-192-102"><a href="#ga2-esri-com-192-168-192-102" class="headerlink" title="ga2.esri.com[192.168.192.102]"></a>ga2.esri.com[192.168.192.102]</h2><h3 id="nfs挂载"><a href="#nfs挂载" class="headerlink" title="nfs挂载"></a>nfs挂载</h3><p>作为nfs所配置的网段下的客户端，需要进行挂载</p>
+<p>nfs相关软件安装及启动可参照101服务器，下面是挂载操作，也与101服务器相同。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[root@ga1 yum.repos.d]# mkdir -p /home/data/gaserver</span><br><span class="line">[root@ga1 yum.repos.d]# chown -R arcgis:esrichina /home/data</span><br><span class="line">[root@ga1 yum.repos.d]# mkdir -p /usr/local/nfsShareFiles</span><br><span class="line">[root@ga1 yum.repos.d]# chmod o+w /home/data/gaserver</span><br><span class="line">[root@ga1 yum.repos.d]# chmod o+w /usr/local/nfsShareFiles</span><br><span class="line">[root@ga1 yum.repos.d]# mount -t nfs 192.168.192.101:/usr/local/nfsShareFiles /home/data/gaserver</span><br></pre></td></tr></table></figure>
+
+<h3 id="安装ArcGIS-Server-2"><a href="#安装ArcGIS-Server-2" class="headerlink" title="安装ArcGIS Server"></a>安装ArcGIS Server</h3><p>操作过程同base.esri.com，但</p>
+<p>此处ArcGIS Server在首次访问&#x2F;arcgis&#x2F;manager时，选择<strong>加入现有站点</strong></p>
+<p>URL填写<code>https://ga1.esri.com:6443</code></p>
+<p><strong>注意：各台服务器的hosts文件都需要加上相应配置，不然访问不到。</strong></p>
+<p>之后一直下一步即可。</p>
+<p>完成后可登陆ga1中，查看[集群]下是否存在ga2，以及[计算机]选项中的ga2是否处于启动状态。</p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/ga%E9%9B%86%E7%BE%A401.png"></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/ga%E9%9B%86%E7%BE%A402.png" alt="ga集群02"></p>
+<h2 id="datastore-esri-com-192-168-192-103"><a href="#datastore-esri-com-192-168-192-103" class="headerlink" title="datastore.esri.com[192.168.192.103]"></a>datastore.esri.com[192.168.192.103]</h2><h3 id="安装ArcGIS-DataStore-1"><a href="#安装ArcGIS-DataStore-1" class="headerlink" title="安装ArcGIS DataStore"></a>安装ArcGIS DataStore</h3><p>安装过程与100服务器中的datastore相同</p>
+<p>此处的datastore需要配置为时空大数据存储，服务器URL填写100服务器的url</p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E6%97%B6%E7%A9%BA%E5%A4%A7%E6%95%B0%E6%8D%AEdatastore01.png"></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E6%97%B6%E7%A9%BA%E5%A4%A7%E6%95%B0%E6%8D%AEdatastore02.png"></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E6%97%B6%E7%A9%BA%E5%A4%A7%E6%95%B0%E6%8D%AEdatastore03.png"></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E6%97%B6%E7%A9%BA%E5%A4%A7%E6%95%B0%E6%8D%AEdatastore04.png" alt="时空大数据datastore04"></p>
+<p><em><strong>[参考资料]</strong></em></p>
+<p>[ArcGIS Server和Data Store的注销与重新配置][<a target="_blank" rel="noopener" href="https://blog.csdn.net/smss007/article/details/76154962]">https://blog.csdn.net/smss007/article/details/76154962]</a></p>
+<h1 id="服务器配置-1"><a href="#服务器配置-1" class="headerlink" title="服务器配置"></a>服务器配置</h1><p>登录<a target="_blank" rel="noopener" href="https://base.esri.com/arcgis/home%E9%97%A8%E6%88%B7%E5%85%A5%E5%8F%A3">https://base.esri.com/arcgis/home门户入口</a></p>
+<p>user:admin  password:admin123</p>
+<h2 id="联合ArcGIS-Server"><a href="#联合ArcGIS-Server" class="headerlink" title="联合ArcGIS Server"></a>联合ArcGIS Server</h2><p>需要进入My Organization-&gt;Edit Settings-&gt;Servers-&gt;Federated Servers-&gt;add server进行编辑。</p>
+<p>通过web adaptor访问portal端后发现，无法进行编辑设置？</p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E9%85%8D%E7%BD%AE%E8%81%94%E5%90%88%E6%9C%8D%E5%8A%A1%E5%99%A801.png"></p>
+<p>查阅资料：<a target="_blank" rel="noopener" href="https://community.esri.com/thread/189808-edit-settings-is-disabled-when-accessing-portal-using-the-web-adaptor">https://community.esri.com/thread/189808-edit-settings-is-disabled-when-accessing-portal-using-the-web-adaptor</a></p>
+<p>解决方法是：</p>
+<p>访问<a target="_blank" rel="noopener" href="https://base.esri.com/arcgis/portaladmin/federation/servers/federate">https://base.esri.com/arcgis/portaladmin/federation/servers/federate</a></p>
+<p>通过其REST API来完成联合</p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E9%85%8D%E7%BD%AE%E8%81%94%E5%90%88%E6%9C%8D%E5%8A%A1%E5%99%A802.png"></p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E9%85%8D%E7%BD%AE%E8%81%94%E5%90%88%E6%9C%8D%E5%8A%A1%E5%99%A803.png"></p>
+<p>Service Url为webadaptor的访问地址</p>
+<p>Admin Url为不通过webadaptor访问arcgis server的地址</p>
+<p><strong>原因：</strong> <a target="_blank" rel="noopener" href="https://support.esri.com/zh-cn/bugs/nimbus/QlVHLTAwMDEwMjU0NA==">https://support.esri.com/zh-cn/bugs/nimbus/QlVHLTAwMDEwMjU0NA==</a></p>
+<h2 id="配置托管服务器"><a href="#配置托管服务器" class="headerlink" title="配置托管服务器"></a>配置托管服务器</h2><p>由于web adaptor不知道啥原因，没办法进入edit setting界面，所以这里通过访问<a target="_blank" rel="noopener" href="https://base.esri.com:7443/arcgis/home%E6%9D%A5%E7%BB%95%E8%BF%87web">https://base.esri.com:7443/arcgis/home来绕过web</a> adaptor。</p>
+<p>如图所示，上面一个框就是刚刚已经配置好的联合服务器，而下面一个框则是需要将hosting server（托管服务器）选择为之前配置的联合服务器中的<em><strong>base.esri.com&#x2F;arcgis</strong></em>即可</p>
+<p><img src="/ArcGIS%E5%88%86%E5%B8%83%E5%BC%8F%E9%83%A8%E7%BD%B2%E6%96%B9%E6%A1%88/%E9%85%8D%E7%BD%AE%E6%89%98%E7%AE%A1%E6%9C%8D%E5%8A%A1%E5%99%A801.png"></p>
+<h2 id="联合ArcGIS-GeoAnalytics-Server"><a href="#联合ArcGIS-GeoAnalytics-Server" class="headerlink" title="联合ArcGIS GeoAnalytics Server"></a>联合ArcGIS GeoAnalytics Server</h2><p><em><strong>什么是ArcGIS GeoAnalytics Server？</strong></em></p>
+<p>ArcGIS GeoAnalytics Server 引入了基于矢量的要素数据的分布式计算，可用于分析大数据或通过 ArcGIS Pro 和 Portal for ArcGIS 提高传统 ArcGIS Desktop 分析工作流的速度。还可以从 GeoAnalytics Server 应用程序中使用 Insights for ArcGIS 功能。</p>
+<p><em><strong>如何部署ArcGIS GeoAnalytics Server？</strong></em></p>
+<p>需要三个站点：</p>
+<ul>
+<li><p>站点 1：基础 ArcGIS Enterprise 部署  <em><strong>base.esri.com[192.168.192.100]</strong></em><br>其中包括以下组件：</p>
+<ul>
+<li><p>Portal for ArcGIS</p>
+</li>
+<li><p>已授权为 GIS 服务器并设置为门户托管服务器的 ArcGIS Server</p>
+</li>
+<li><p>两个 ArcGIS Web Adaptor 安装程序 - 一个配置在门户中，另一个配置在 GIS 服务器中。</p>
+</li>
+<li><p>至少两个 ArcGIS Data Store 安装程序 - 一个配置为关系数据存储，另一个配置为时空大数据存储(站点3)。您应该将时空大数据存储部署在与其他任何 ArcGIS Enterprise 组件所位于计算机不同的计算机上。您可以在时空大数据存储中包含多台计算机。有关站点架构建议的详细信息，请参阅<a target="_blank" rel="noopener" href="http://enterprise.arcgis.com/zh-cn/server/latest/get-started/windows/additional-server-deployment.htm">其他服务器部署</a>。</p>
+</li>
+</ul>
+</li>
+<li><p>站点2：ArcGIS GeoAnalytics Server  <em><strong>ga1.esri.com[192.168.192.101&#x2F;102]</strong></em></p>
+<p>此站点需要许可为 ArcGIS Server 并使用以下步骤进行配置的 ArcGIS GeoAnalytics Server 站点。</p>
+</li>
+<li><p>站点3：时空大数据 ArcGIS DataStore  <em><strong>datastore.esri.com[192.168.192.103]</strong></em></p>
+</li>
+</ul>
+<h1 id="ArcGIS-相关文档连接"><a href="#ArcGIS-相关文档连接" class="headerlink" title="ArcGIS 相关文档连接"></a>ArcGIS 相关文档连接</h1><p>[SDK&amp;Documents][<a target="_blank" rel="noopener" href="https://developers.arcgis.com/downloads/apis-and-sdks]">https://developers.arcgis.com/downloads/apis-and-sdks]</a></p>
+<p>[<a target="_blank" rel="noopener" href="https://developers.arcgis.com/downloads/apis-and-sdks]">https://developers.arcgis.com/downloads/apis-and-sdks]</a>: <a target="_blank" rel="noopener" href="https://developers.arcgis.com/downloads/apis-and-sdks">https://developers.arcgis.com/downloads/apis-and-sdks</a>	“SDK&amp;Documents”</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag"># 环境搭建</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/IDEA%E9%9B%86%E6%88%90Resin%E5%90%AF%E5%8A%A8Maven%E9%A1%B9%E7%9B%AE/" rel="prev" title="IDEA集成Resin启动Maven项目">
+                  <i class="fa fa-chevron-left"></i> IDEA集成Resin启动Maven项目
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/%E5%88%9D%E6%8E%A2MapReduce/" rel="next" title="初探MapReduce">
+                  初探MapReduce <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">你丶一顾倾城</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+</body>
+</html>
