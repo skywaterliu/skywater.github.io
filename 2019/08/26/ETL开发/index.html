@@ -160,7 +160,7 @@
         <div class="site-overview-wrap sidebar-panel">
           <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
   <p class="site-author-name" itemprop="name">你丶一顾倾城</p>
-  <div class="site-description" itemprop="description">嗨害嗨！</div>
+  <div class="site-description" itemprop="description">抽象不依赖于具体，具体依赖于抽象。</div>
 </div>
 <div class="site-state-wrap site-overview-item animated">
   <nav class="site-state">
@@ -233,7 +233,7 @@
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="安之一隅">
-      <meta itemprop="description" content="嗨害嗨！">
+      <meta itemprop="description" content="抽象不依赖于具体，具体依赖于抽象。">
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
@@ -347,7 +347,13 @@
 <p>此部分最为繁琐，通常会占用ETL开发时间的2&#x2F;3左右</p>
 <h3 id="加载-Load"><a href="#加载-Load" class="headerlink" title="加载(Load)"></a>加载(Load)</h3><p>将清洗、转换完的数据加载到数据仓库中。</p>
 <hr>
-<h2 id="ETL开发流程"><a href="#ETL开发流程" class="headerlink" title="ETL开发流程"></a>ETL开发流程</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">graph LR;</span><br><span class="line">    业务库-- &quot;抽取[E]、清洗&quot; --&gt;ODS;</span><br><span class="line">    ODS-- &quot;转换[T]、加载[L]&quot; --&gt;DW;</span><br><span class="line">    DW-- &quot;转换[T]、加载[L]&quot; --&gt;DW;</span><br><span class="line">    DW-- &quot;转换[T]、加载[L]&quot; --&gt;DM;</span><br><span class="line">    DM-- &quot;转换[T]、加载[L]&quot; --&gt;DM;</span><br><span class="line">    DM--&gt;BI前端工具;</span><br></pre></td></tr></table></figure>
+<h2 id="ETL开发流程"><a href="#ETL开发流程" class="headerlink" title="ETL开发流程"></a>ETL开发流程</h2><pre class="mermaid">graph LR;
+    业务库-- "抽取[E]、清洗" -->ODS;
+    ODS-- "转换[T]、加载[L]" -->DW;
+    DW-- "转换[T]、加载[L]" -->DW;
+    DW-- "转换[T]、加载[L]" -->DM;
+    DM-- "转换[T]、加载[L]" -->DM;
+    DM-->BI前端工具;</pre>
 
 <h3 id="抽取数据源中的数据"><a href="#抽取数据源中的数据" class="headerlink" title="抽取数据源中的数据"></a>抽取数据源中的数据</h3><h4 id="对于不同数据源"><a href="#对于不同数据源" class="headerlink" title="对于不同数据源"></a>对于不同数据源</h4><p>通常我们需要将多个不同的数据源中的数据整合到统一的BI数据仓库中。</p>
 <ol>
@@ -481,6 +487,8 @@
 <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
 
 
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdn.jsdelivr.net/npm/mermaid@8.14.0/dist/mermaid.min.js","integrity":"sha256-7wT34TI0pEBeEFoi4z+vhuSddGh6vUTMWdqJ2SDe2jg="}}</script>
+  <script src="/js/third-party/tags/mermaid.js"></script>
 
 
 
